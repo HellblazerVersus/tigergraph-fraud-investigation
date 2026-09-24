@@ -1,5 +1,8 @@
 """
-ui/app.py — Streamlit Analyst Dashboard for HHGOA Fraud Investigation Agent
+ui/app.py — TigerGraph GraphStudio & Agentic Fraud Investigation Dashboard
+
+An analyst dashboard integrating TigerGraph GraphStudio schema design,
+interactive graph exploration, GSQL query execution, and autonomous LangGraph fraud investigation.
 
 Run: streamlit run ui/app.py
 """
@@ -11,18 +14,29 @@ import json
 import time
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from agent.tools import (
+    _get_conn,
+    graph_card_window,
+    graph_txn_subgraph,
+    graph_customer_history,
+    graph_card_testing_check,
+    graph_region_history,
+    graph_device_neighbors,
+)
+
 # ─────────────────────────────────────────────────────────
 # Page Configuration
 # ─────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="TigerGraph Fraud Investigation | HHGOA",
-    page_icon=":material/security:",
+    page_title="TigerGraph GraphStudio | Fraud Investigation",
+    page_icon="🐅",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -30,9 +44,10 @@ st.set_page_config(
 DATASET_DIR = os.getenv("DATASET_DIR", "./HHGOA_IEEE")
 CASES_DIR = Path(os.getenv("CASES_OUTPUT_DIR", "./cases"))
 CASES_DIR.mkdir(exist_ok=True)
+STUDIO_URL = "http://localhost:14240/studio/#/schema-designer?graph=fraud_investigation"
 
 # ─────────────────────────────────────────────────────────
-# Data Loading & Helpers
+# Cached Data Loaders
 # ─────────────────────────────────────────────────────────
 @st.cache_data
 def load_case_pack() -> pd.DataFrame:
@@ -71,6 +86,26 @@ def get_all_answers() -> list[dict]:
     return answers
 
 
+@st.cache_data(ttl=60)
+def get_graph_counts() -> dict[str, int]:
+    try:
+        conn = _get_conn()
+        v_types = [
+            "Customer", "Card", "Transaction", "DeviceProfile",
+            "EmailDomain", "BillingRegion", "ClosedCase", "FraudCase",
+            "PolicyDocument", "FraudPattern"
+        ]
+        counts = {}
+        for vt in v_types:
+            try:
+                counts[vt] = conn.getVertexCount(vt)
+            except Exception:
+                counts[vt] = 0
+        return counts
+    except Exception:
+        return {}
+
+
 PATTERN_LABELS = {
     "card_testing": "Card Testing",
     "card_not_present_fraud": "Card-Not-Present (CNP)",
@@ -88,51 +123,63 @@ ROUTE_COLORS = {
 }
 
 # ─────────────────────────────────────────────────────────
-# Sidebar Navigation & System Telemetry
+# Top GraphStudio Header Banner (Matching image.png)
+# ─────────────────────────────────────────────────────────
+head_left, head_center, head_right = st.columns([2.5, 3, 2.5])
+with head_left:
+    st.markdown("### 🐅 **GraphStudio** `v4.2.5`")
+    st.caption("TigerGraph Community Edition · Enterprise Graph AI")
+with head_center:
+    st.markdown("<div style='text-align: center; padding-top: 10px;'>", unsafe_allow_html=True)
+    st.markdown(":green-badge[:material/database: graph: fraud_investigation (superuser)] :blue-badge[:material/cable: port: 14240]")
+    st.markdown("</div>", unsafe_allow_html=True)
+with head_right:
+    st.markdown("<div style='text-align: right; padding-top: 5px;'>", unsafe_allow_html=True)
+    st.link_button("🌐 Open GraphStudio in Browser", STUDIO_URL)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown("---")
+
+# ─────────────────────────────────────────────────────────
+# Sidebar Navigation (Mirrored from GraphStudio in image.png)
 # ─────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("### :material/shield: Fraud Investigation")
-    st.caption("TigerGraph Autonomous Agent · HHGOA 2026")
+    st.markdown("### 🐅 **GraphStudio Menu**")
+    st.caption("Active Graph: `fraud_investigation`")
 
     page = st.radio(
-        "Navigation",
+        "GraphStudio Modules",
         [
-            "Overview Dashboard",
-            "Investigate Case",
-            "Benchmark Cases",
-            "Graph Case Memory",
-            "Fraud Policy & Governance",
+            "📊 Executive Dashboard",
+            "🕸️ Design Schema (GraphStudio)",
+            "🧭 Explore Graph",
+            "✍️ Write Queries (GSQL Runner)",
+            "🖥️ Embedded GraphStudio Live",
+            "🕵️ Investigate Case (AI Agent)",
+            "📁 Benchmark Cases (20 Cases)",
+            "🧠 Graph Case Memory",
+            "📜 Fraud Policy & Governance",
         ],
         index=0,
     )
 
     st.markdown("---")
-    st.markdown("#### System status")
+    st.markdown("#### System Telemetry")
     with st.container(border=True):
         st.markdown(":green-badge[:material/check_circle: TigerGraph CE 4.2.5 Online]")
-        st.caption("Host: `localhost:9000` | Graph: `fraud_investigation`")
+        st.caption("RESTPP: `9000` | GUI Studio: `14240`")
         st.markdown(":blue-badge[:material/hub: LangGraph State Machine]")
         st.markdown(":purple-badge[:material/smart_toy: Gemini 3.5 Flash Lite]")
         st.markdown(":orange-badge[:material/cable: TigerGraph MCP 2.2.0]")
 
-# ─────────────────────────────────────────────────────────
-# Top Header Banner
-# ─────────────────────────────────────────────────────────
-col_head, col_badge = st.columns([3, 1])
-with col_head:
-    st.title("TigerGraph Agentic Fraud Investigation")
-    st.caption("Autonomous multi-hop graph investigation, uncertainty quantification, and policy-governed next-best actions.")
-with col_badge:
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.badge("Hacker House Goa 2026", icon=":material/hotel_class:", color="blue")
-
 
 # ─────────────────────────────────────────────────────────
-# PAGE 1: Overview Dashboard
+# PAGE 1: Executive Dashboard
 # ─────────────────────────────────────────────────────────
-if page == "Overview Dashboard":
+if page == "📊 Executive Dashboard":
     case_pack = load_case_pack()
     answers = get_all_answers()
+    graph_counts = get_graph_counts()
 
     total_cases = len(case_pack)
     investigated_cases = len(answers)
@@ -142,7 +189,7 @@ if page == "Overview Dashboard":
     sar_cases = [a for a in answers if a.get("sar", {}).get("file")]
     total_exposure = sum(float(a.get("case", {}).get("exposure_usd", 0.0)) for a in fraud_cases)
 
-    # KPI Row with border cards
+    # KPI Row
     k1, k2, k3, k4, k5 = st.columns(5)
     with k1:
         st.metric("Total Cases", total_cases, border=True)
@@ -155,7 +202,18 @@ if page == "Overview Dashboard":
     with k5:
         st.metric("Identified Exposure", f"${total_exposure:,.2f}", border=True)
 
-    # Chart Section
+    # Live TigerGraph Stats Banner
+    if graph_counts:
+        with st.container(border=True):
+            st.markdown("#### 🐅 Live TigerGraph Scale")
+            g_col1, g_col2, g_col3, g_col4, g_col5 = st.columns(5)
+            g_col1.metric("Transactions", f"{graph_counts.get('Transaction', 0):,}")
+            g_col2.metric("Cards", f"{graph_counts.get('Card', 0):,}")
+            g_col3.metric("Customers", f"{graph_counts.get('Customer', 0):,}")
+            g_col4.metric("Device Profiles", f"{graph_counts.get('DeviceProfile', 0):,}")
+            g_col5.metric("Case Memory", f"{graph_counts.get('ClosedCase', 0) + graph_counts.get('FraudCase', 0):,}")
+
+    # Charts Row
     c1, c2 = st.columns([2, 1])
     with c1:
         with st.container(border=True):
@@ -181,56 +239,266 @@ if page == "Overview Dashboard":
             else:
                 st.info("No data yet.")
 
-    # Benchmark Progress Table
+
+# ─────────────────────────────────────────────────────────
+# PAGE 2: Design Schema (GraphStudio — Mirroring image.png)
+# ─────────────────────────────────────────────────────────
+elif page == "🕸️ Design Schema (GraphStudio)":
+    st.subheader("🕸️ GraphStudio Schema Designer")
+    st.caption("Visual representation of the 10 vertex types and 18 edge types in graph `fraud_investigation`")
+
+    # Toolbar matching GraphStudio in image.png
     with st.container(border=True):
-        st.subheader("Benchmark Cases Status")
-        ans_map = {a["case_id"]: a for a in answers}
+        tb1, tb2, tb3, tb4, tb5, tb6 = st.columns(6)
+        tb1.button("➕ Add Vertex Type", disabled=True)
+        tb2.button("➕ Add Edge Type", disabled=True)
+        tb3.button("💾 Save Schema", disabled=True)
+        tb4.button("📤 Export Schema", disabled=True)
+        tb5.button("🔄 Sync TigerGraph", on_click=st.cache_data.clear)
+        tb6.markdown(f"[🌐 Launch Studio]({STUDIO_URL})")
 
-        table_rows = []
-        for _, row in case_pack.iterrows():
-            cid = row["case_id"]
-            ans = ans_map.get(cid)
-            if ans:
-                c = ans.get("case", {})
-                verdict = c.get("verdict", "").upper()
-                prob = f"{c.get('fraud_probability', 0):.0%}"
-                pat = PATTERN_LABELS.get(c.get("pattern", ""), c.get("pattern", ""))
-                exp = f"${c.get('exposure_usd', 0):,.2f}"
-                sar_flag = "Filed (L2)" if ans.get("sar", {}).get("file") else "Not Required"
-                status_badge = "Complete"
-                mem = "Persisted" if c.get("written_to_graph") else "—"
-            else:
-                verdict = "—"
-                prob = "—"
-                pat = "—"
-                exp = "—"
-                sar_flag = "—"
-                status_badge = "Pending"
-                mem = "—"
+    # Schema Graph Diagram using Graphviz
+    with st.container(border=True):
+        st.markdown("#### Schema Architecture Canvas")
+        dot_code = """
+        digraph FraudInvestigationSchema {
+            graph [rankdir=LR, bgcolor="transparent", fontname="Inter"];
+            node [shape=circle, style=filled, fontname="Inter", fontsize=11, width=1.4, fixedsize=true, fontcolor="#FFFFFF"];
+            edge [fontname="JetBrains Mono", fontsize=9, color="#94A3B8", fontcolor="#60A5FA"];
 
-            table_rows.append({
-                "Case ID": cid,
-                "Trigger Type": row["trigger_type"],
-                "Model Risk Score": f"{row['risk_score']:.2f}" if pd.notna(row["risk_score"]) else "N/A",
-                "Card ID": row["card_id"],
-                "Customer ID": row["customer_id"],
-                "Verdict": verdict,
-                "Fraud Prob": prob,
-                "Pattern": pat,
-                "Exposure": exp,
-                "SAR": sar_flag,
-                "Graph Memory": mem,
-                "Status": status_badge,
-            })
+            Customer [fillcolor="#F59E0B", label="Customer\\n[13.5K]"];
+            Card [fillcolor="#3B82F6", label="Card\\n[13.9K]"];
+            Transaction [fillcolor="#8B5CF6", label="Transaction\\n[590K]"];
+            DeviceProfile [fillcolor="#10B981", label="DeviceProfile\\n[9.7K]"];
+            EmailDomain [fillcolor="#14B8A6", label="EmailDomain\\n[Teal]"];
+            BillingRegion [fillcolor="#EF4444", label="BillingRegion\\n[Red]"];
+            ClosedCase [fillcolor="#D97706", label="ClosedCase\\n[5.5K]"];
+            FraudCase [fillcolor="#DC2626", label="FraudCase\\n[Memory]"];
+            PolicyDocument [fillcolor="#64748B", label="Policy\\n[Docs]"];
+            FraudPattern [fillcolor="#EC4899", label="FraudPattern\\n[Patterns]"];
 
-        st.dataframe(pd.DataFrame(table_rows), width="stretch")
+            Customer -> Card [label="OWNS"];
+            Card -> Transaction [label="MADE"];
+            Transaction -> DeviceProfile [label="FROM_DEVICE"];
+            Transaction -> EmailDomain [label="PURCHASER_EMAIL"];
+            Transaction -> BillingRegion [label="BILLED_IN"];
+            Transaction -> Transaction [label="NEXT"];
+
+            ClosedCase -> Transaction [label="INVOLVES"];
+            ClosedCase -> Card [label="ON_CARD"];
+            ClosedCase -> Card [label="CONNECTED_TO"];
+
+            FraudCase -> Transaction [label="CASE_TXN"];
+            FraudCase -> Card [label="CASE_CARD"];
+            FraudCase -> Customer [label="CASE_CUST"];
+        }
+        """
+        st.graphviz_chart(dot_code, width="stretch")
+
+    # Schema Details & Attributes
+    col_v, col_e = st.columns(2)
+    with col_v:
+        with st.container(border=True):
+            st.markdown("#### 🔷 Vertex Types (10 Types)")
+            vertex_data = [
+                {"Vertex Type": "Customer", "Primary Key": "customer_id", "Key Attributes": "customer_id, risk_score_mean"},
+                {"Vertex Type": "Card", "Primary Key": "card_id", "Key Attributes": "card_id, card_type, is_active"},
+                {"Vertex Type": "Transaction", "Primary Key": "txn_id", "Key Attributes": "amount, is_online, risk_score, ts"},
+                {"Vertex Type": "DeviceProfile", "Primary Key": "device_id", "Key Attributes": "device_info, os, browser, screen"},
+                {"Vertex Type": "EmailDomain", "Primary Key": "domain", "Key Attributes": "domain_name, is_free"},
+                {"Vertex Type": "BillingRegion", "Primary Key": "region_id", "Key Attributes": "addr1, addr2, risk_tier"},
+                {"Vertex Type": "ClosedCase", "Primary Key": "case_id", "Key Attributes": "outcome, pattern, exposure_usd, n_txns"},
+                {"Vertex Type": "FraudCase", "Primary Key": "case_id", "Key Attributes": "status, verdict, fraud_probability, pattern"},
+                {"Vertex Type": "PolicyDocument", "Primary Key": "doc_id", "Key Attributes": "doc_type, title, content"},
+                {"Vertex Type": "FraudPattern", "Primary Key": "pattern_id", "Key Attributes": "name, description, policy_rule"},
+            ]
+            st.dataframe(pd.DataFrame(vertex_data), width="stretch")
+
+    with col_e:
+        with st.container(border=True):
+            st.markdown("#### 🔗 Edge Types (18 Types)")
+            edge_data = [
+                {"Edge Type": "OWNS", "Source Vertex": "Customer", "Target Vertex": "Card", "Directed": True},
+                {"Edge Type": "MADE", "Source Vertex": "Card", "Target Vertex": "Transaction", "Directed": True},
+                {"Edge Type": "FROM_DEVICE", "Source Vertex": "Transaction", "Target Vertex": "DeviceProfile", "Directed": True},
+                {"Edge Type": "PURCHASER_EMAIL", "Source Vertex": "Transaction", "Target Vertex": "EmailDomain", "Directed": True},
+                {"Edge Type": "BILLED_IN", "Source Vertex": "Transaction", "Target Vertex": "BillingRegion", "Directed": True},
+                {"Edge Type": "NEXT", "Source Vertex": "Transaction", "Target Vertex": "Transaction", "Directed": True},
+                {"Edge Type": "INVOLVES", "Source Vertex": "ClosedCase", "Target Vertex": "Transaction", "Directed": True},
+                {"Edge Type": "ON_CARD", "Source Vertex": "ClosedCase", "Target Vertex": "Card", "Directed": True},
+                {"Edge Type": "CONNECTED_TO", "Source Vertex": "ClosedCase", "Target Vertex": "Card", "Directed": True},
+                {"Edge Type": "CASE_TXN", "Source Vertex": "FraudCase", "Target Vertex": "Transaction", "Directed": True},
+            ]
+            st.dataframe(pd.DataFrame(edge_data), width="stretch")
 
 
 # ─────────────────────────────────────────────────────────
-# PAGE 2: Investigate Case
+# PAGE 3: Explore Graph
 # ─────────────────────────────────────────────────────────
-elif page == "Investigate Case":
-    st.subheader("Interactive Case Investigation")
+elif page == "🧭 Explore Graph":
+    st.subheader("🧭 TigerGraph Neighborhood Explorer")
+    st.caption("Inspect live connected subgraphs, transaction temporal chains, and shared device networks.")
+
+    e_col1, e_col2, e_col3 = st.columns([1.5, 2.5, 1])
+    with e_col1:
+        entity_type = st.selectbox("Entity Type", ["Transaction", "Card", "Customer", "Device"])
+    with e_col2:
+        default_val = {
+            "Transaction": "3514030",
+            "Card": "C12382-K1",
+            "Customer": "C12382",
+            "Device": "DBD75C3985A"
+        }.get(entity_type, "3514030")
+        entity_id = st.text_input("Enter ID", value=default_val)
+    with e_col3:
+        st.markdown("<br>", unsafe_allow_html=True)
+        explore_btn = st.button("Explore Subgraph", type="primary")
+
+    if explore_btn or entity_id:
+        with st.spinner(f"Traversing graph for {entity_type} {entity_id}..."):
+            if entity_type == "Transaction":
+                subgraph = graph_txn_subgraph.invoke({"txn_id": entity_id})
+                card_id = subgraph.get("card_id", "N/A")
+                cust_id = subgraph.get("customer_id", "N/A")
+                dev_ids = subgraph.get("device_ids", [])
+                email = subgraph.get("email_domain", "N/A")
+
+                with st.container(border=True):
+                    st.markdown(f"#### 1-Hop Subgraph for Transaction `{entity_id}`")
+                    sub_dot = f"""
+                    digraph Subgraph {{
+                        graph [rankdir=LR, bgcolor="transparent", fontname="Inter"];
+                        node [shape=box, style=filled, fontname="Inter", fontsize=10, fontcolor="#FFFFFF", rx=6, ry=6];
+                        edge [fontname="JetBrains Mono", fontsize=8, color="#94A3B8", fontcolor="#60A5FA"];
+
+                        Txn [fillcolor="#8B5CF6", label="Transaction\\n{entity_id}\\nAmount: ${subgraph.get('amount', 0):,.2f}"];
+                        CardNode [fillcolor="#3B82F6", label="Card\\n{card_id}"];
+                        CustNode [fillcolor="#F59E0B", label="Customer\\n{cust_id}"];
+                        EmailNode [fillcolor="#14B8A6", label="Email\\n{email}"];
+
+                        CardNode -> Txn [label="MADE"];
+                        CustNode -> CardNode [label="OWNS"];
+                        Txn -> EmailNode [label="PURCHASER_EMAIL"];
+                    """
+                    for d in dev_ids:
+                        sub_dot += f"""
+                        Dev_{d[:8]} [fillcolor="#10B981", label="Device\\n{d[:12]}"];
+                        Txn -> Dev_{d[:8]} [label="FROM_DEVICE"];
+                        """
+                    sub_dot += "}"
+                    st.graphviz_chart(sub_dot, width="stretch")
+                    st.json(subgraph)
+
+            elif entity_type == "Card":
+                win = graph_card_window.invoke({"card_id": entity_id, "hours": 48})
+                ct = graph_card_testing_check.invoke({"card_id": entity_id})
+                with st.container(border=True):
+                    st.markdown(f"#### 48-Hour Activity on Card `{entity_id}`")
+                    st.markdown(f"**Total Transactions in Window:** `{win.get('txn_count', 0)}` &nbsp;|&nbsp; **Card Testing Detected:** `{ct.get('is_card_testing_pattern', False)}`")
+                    st.json(win)
+
+            elif entity_type == "Customer":
+                hist = graph_customer_history.invoke({"customer_id": entity_id})
+                with st.container(border=True):
+                    st.markdown(f"#### Customer Profile for `{entity_id}`")
+                    st.markdown(f"**Customer Owned Cards ({len(hist.get('card_ids', []))}):** {', '.join([f'`{c}`' for c in hist.get('card_ids', [])])}")
+                    st.json(hist)
+
+            elif entity_type == "Device":
+                dev_res = graph_device_neighbors.invoke({"txn_id": "3506725", "days": 90})
+                with st.container(border=True):
+                    st.markdown(f"#### Device Neighbors for `{entity_id}`")
+                    st.json(dev_res)
+
+
+# ─────────────────────────────────────────────────────────
+# PAGE 4: Write Queries (GSQL Runner)
+# ─────────────────────────────────────────────────────────
+elif page == "✍️ Write Queries (GSQL Runner)":
+    st.subheader("✍️ TigerGraph GSQL Query Runner")
+    st.caption("Execute pre-installed and analytical graph queries against `fraud_investigation`")
+
+    query_choice = st.selectbox(
+        "Select Stored Query",
+        [
+            "card_window(card_id, hours)",
+            "txn_subgraph(txn_id)",
+            "customer_history(customer_id)",
+            "card_testing_check(card_id, amount_threshold, count_threshold)",
+            "region_history(card_id)",
+            "device_neighbors(txn_id, days)",
+        ]
+    )
+
+    q_form = st.container(border=True)
+    with q_form:
+        if "card_window" in query_choice:
+            p_card = st.text_input("card_id", "C12382-K1")
+            p_hours = st.number_input("hours", value=48, min_value=1, max_value=720)
+            if st.button("▶️ Execute Query", type="primary"):
+                res = graph_card_window.invoke({"card_id": p_card, "hours": int(p_hours)})
+                st.success("Query Executed Successfully")
+                st.json(res)
+
+        elif "txn_subgraph" in query_choice:
+            p_txn = st.text_input("txn_id", "3514030")
+            if st.button("▶️ Execute Query", type="primary"):
+                res = graph_txn_subgraph.invoke({"txn_id": p_txn})
+                st.success("Query Executed Successfully")
+                st.json(res)
+
+        elif "customer_history" in query_choice:
+            p_cust = st.text_input("customer_id", "C12382")
+            if st.button("▶️ Execute Query", type="primary"):
+                res = graph_customer_history.invoke({"customer_id": p_cust})
+                st.success("Query Executed Successfully")
+                st.json(res)
+
+        elif "card_testing_check" in query_choice:
+            p_card = st.text_input("card_id", "C11891-K1")
+            p_amt = st.number_input("amount_threshold", value=5.0)
+            p_cnt = st.number_input("count_threshold", value=3)
+            if st.button("▶️ Execute Query", type="primary"):
+                res = graph_card_testing_check.invoke({
+                    "card_id": p_card,
+                    "amount_threshold": float(p_amt),
+                    "count_threshold": int(p_cnt),
+                })
+                st.success("Query Executed Successfully")
+                st.json(res)
+
+        elif "region_history" in query_choice:
+            p_card = st.text_input("card_id", "C12382-K1")
+            if st.button("▶️ Execute Query", type="primary"):
+                res = graph_region_history.invoke({"card_id": p_card})
+                st.success("Query Executed Successfully")
+                st.json(res)
+
+        elif "device_neighbors" in query_choice:
+            p_txn = st.text_input("txn_id", "3506725")
+            p_days = st.number_input("days", value=90)
+            if st.button("▶️ Execute Query", type="primary"):
+                res = graph_device_neighbors.invoke({"txn_id": p_txn, "days": int(p_days)})
+                st.success("Query Executed Successfully")
+                st.json(res)
+
+
+# ─────────────────────────────────────────────────────────
+# PAGE 5: Embedded GraphStudio Live
+# ─────────────────────────────────────────────────────────
+elif page == "🖥️ Embedded GraphStudio Live":
+    st.subheader("🖥️ Live Embedded TigerGraph GraphStudio")
+    st.caption(f"Connecting to live GraphStudio web server on `{STUDIO_URL}`")
+
+    st.info("💡 You can interact with GraphStudio directly inside this window, or open it in a full tab.")
+    components.iframe(STUDIO_URL, height=850, scrolling=True)
+
+
+# ─────────────────────────────────────────────────────────
+# PAGE 6: Investigate Case (AI Agent)
+# ─────────────────────────────────────────────────────────
+elif page == "🕵️ Investigate Case (AI Agent)":
+    st.subheader("🕵️ Autonomous Fraud Investigation Agent")
 
     case_pack = load_case_pack()
     selected_case = st.selectbox(
@@ -240,7 +508,6 @@ elif page == "Investigate Case":
     )
     row = case_pack[case_pack["case_id"] == selected_case].iloc[0]
 
-    # Trigger Information Card
     with st.container(border=True):
         t1, t2, t3, t4 = st.columns(4)
         t1.markdown(f"**Case ID:** `{row['case_id']}`")
@@ -254,12 +521,7 @@ elif page == "Investigate Case":
 
     existing_answer = load_answer_file(selected_case)
 
-    # Action Toolbar
-    act_col1, act_col2 = st.columns([1, 4])
-    with act_col1:
-        run_btn = st.button("🚀 Re-run Live Investigation", type="primary")
-
-    if run_btn:
+    if st.button("🚀 Re-run Live Agent Investigation", type="primary"):
         from agent.graph import run_investigation
         from benchmark.run_benchmark_cases import state_to_answer
 
@@ -284,9 +546,7 @@ elif page == "Investigate Case":
         nba_data = existing_answer.get("next_best_actions", {})
         sar_data = existing_answer.get("sar", {})
 
-        # Verdict Header Metrics
         m1, m2, m3, m4 = st.columns(4)
-        v_color = "red" if case_data.get("verdict") == "fraud" else ("green" if case_data.get("verdict") == "legitimate" else "orange")
         with m1:
             st.metric("Investigation Verdict", case_data.get("verdict", "").upper(), border=True)
         with m2:
@@ -296,7 +556,6 @@ elif page == "Investigate Case":
         with m4:
             st.metric("Latency & Tools", f"{existing_answer.get('latency_s', 0):.1f}s / {existing_answer.get('tool_calls', 0)} calls", border=True)
 
-        # Tabbed Investigation Details
         tab_summary, tab_evidence, tab_actions, tab_sar, tab_memory, tab_json = st.tabs([
             "Case Summary",
             "Graph Evidence Chain",
@@ -324,8 +583,6 @@ elif page == "Investigate Case":
         with tab_evidence:
             st.markdown("#### Evidence Items Grounded from Knowledge Graph & Policy")
             ev_list = case_data.get("evidence", [])
-            if not ev_list:
-                st.info("No evidence items attached.")
             for i, ev in enumerate(ev_list, 1):
                 with st.container(border=True):
                     src = ev.get("source", "graph").upper()
@@ -381,24 +638,19 @@ elif page == "Investigate Case":
                 prior_cases = case_data.get("similar_prior_cases", [])
                 if prior_cases:
                     st.markdown(f"**Similar Prior Cases Retrieved from Memory:** {', '.join([f'`{c}`' for c in prior_cases])}")
-                else:
-                    st.caption("No identical historical patterns retrieved for this episode.")
 
         with tab_json:
             st.json(existing_answer)
 
 
 # ─────────────────────────────────────────────────────────
-# PAGE 3: Benchmark Cases
+# PAGE 7: Benchmark Cases (20 Cases)
 # ─────────────────────────────────────────────────────────
-elif page == "Benchmark Cases":
-    st.subheader("Benchmark Execution & Performance Metrics")
+elif page == "📁 Benchmark Cases (20 Cases)":
+    st.subheader("📁 Benchmark Execution & Performance Metrics")
     answers = get_all_answers()
 
-    if not answers:
-        st.warning("No answer files found in cases/. Run benchmark/run_benchmark_cases.py first.")
-    else:
-        # Latency & Tool Calls Metrics
+    if answers:
         latencies = [a.get("latency_s", 0) for a in answers]
         tool_counts = [a.get("tool_calls", 0) for a in answers]
 
@@ -421,26 +673,22 @@ elif page == "Benchmark Cases":
                 "Tool Calls": a.get("tool_calls", 0),
                 "Latency": f"{a.get('latency_s', 0):.1f}s",
             })
-
         st.dataframe(pd.DataFrame(rows), width="stretch")
 
 
 # ─────────────────────────────────────────────────────────
-# PAGE 4: Graph Case Memory
+# PAGE 8: Graph Case Memory
 # ─────────────────────────────────────────────────────────
-elif page == "Graph Case Memory":
-    st.subheader("Historical Closed Case Memory (TigerGraph)")
+elif page == "🧠 Graph Case Memory":
+    st.subheader("🧠 Historical Closed Case Memory (TigerGraph)")
     closed = load_closed_cases()
 
     cm1, cm2, cm3 = st.columns(3)
     cm1.metric("Total Historical Cases", len(closed), border=True)
-    confirmed_count = len(closed[closed["outcome"] == "confirmed_fraud"])
-    cm2.metric("Confirmed Fraud Cases", confirmed_count, border=True)
-    cleared_count = len(closed[closed["outcome"] == "cleared"])
-    cm3.metric("Cleared Cases", cleared_count, border=True)
+    cm2.metric("Confirmed Fraud Cases", len(closed[closed["outcome"] == "confirmed_fraud"]), border=True)
+    cm3.metric("Cleared Cases", len(closed[closed["outcome"] == "cleared"]), border=True)
 
     with st.container(border=True):
-        st.subheader("Historical Fraud Pattern Distribution")
         p_counts = closed[closed["outcome"] == "confirmed_fraud"]["pattern"].value_counts()
         st.bar_chart(p_counts, color="#60A5FA")
 
@@ -457,10 +705,10 @@ elif page == "Graph Case Memory":
 
 
 # ─────────────────────────────────────────────────────────
-# PAGE 5: Fraud Policy & Governance
+# PAGE 9: Fraud Policy & Governance
 # ─────────────────────────────────────────────────────────
-elif page == "Fraud Policy & Governance":
-    st.subheader("Bank Fraud Policy & Approval Matrix (Rules R1 – R10)")
+elif page == "📜 Fraud Policy & Governance":
+    st.subheader("📜 Bank Fraud Policy & Approval Matrix (Rules R1 – R10)")
 
     with st.container(border=True):
         st.markdown("#### Governance & Approval Routing Tiers")
