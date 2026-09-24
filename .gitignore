@@ -11,13 +11,16 @@ venv/
 ENV/
 
 # Large raw dataset files (IEEE-CIS dataset)
-HHGOA_IEEE/
+HHGOA_IEEE/transactions.csv
+HHGOA_IEEE/identity.csv
 
 # OS & Editor files
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+*.jpeg
+*.jpg
 
 # Distribution & Packaging
 *.egg-info/
