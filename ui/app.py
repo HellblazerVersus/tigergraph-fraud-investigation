@@ -47,6 +47,98 @@ CASES_DIR.mkdir(exist_ok=True)
 STUDIO_URL = "http://localhost:14240/studio/#/schema-designer?graph=fraud_investigation"
 
 # ─────────────────────────────────────────────────────────
+# TigerGraph GraphStudio Authentic Styling (Matching image.png)
+# ─────────────────────────────────────────────────────────
+st.html("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+html, body, [data-testid="stAppViewContainer"] {
+    background-color: #F3F4F6 !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    color: #1F2937 !important;
+}
+
+/* Sidebar: Clean white studio navigation */
+[data-testid="stSidebar"] {
+    background-color: #FFFFFF !important;
+    border-right: 1px solid #E5E7EB !important;
+}
+
+[data-testid="stSidebar"] * {
+    color: #1F2937 !important;
+}
+
+/* Top Header */
+[data-testid="stHeader"] {
+    background-color: #FFFFFF !important;
+    border-bottom: 1px solid #E5E7EB !important;
+}
+
+/* Primary action buttons: TigerGraph Orange */
+button[kind="primary"], .stButton > button[kind="primary"] {
+    background-color: #FA6400 !important;
+    border-color: #FA6400 !important;
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+}
+button[kind="primary"]:hover {
+    background-color: #E05600 !important;
+    border-color: #E05600 !important;
+}
+
+/* Standard buttons */
+.stButton > button {
+    background-color: #FFFFFF !important;
+    border: 1px solid #D1D5DB !important;
+    color: #374151 !important;
+    border-radius: 4px !important;
+}
+.stButton > button:hover {
+    border-color: #FA6400 !important;
+    color: #FA6400 !important;
+}
+
+/* Cards & containers: White cards with crisp borders */
+div[data-testid="stVerticalBlockBorderWrapper"] > div {
+    background-color: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Metrics display */
+[data-testid="stMetricValue"] {
+    color: #111827 !important;
+    font-weight: 700 !important;
+}
+[data-testid="stMetricLabel"] {
+    color: #4B5563 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+}
+
+/* Tabs */
+button[data-baseweb="tab"] {
+    color: #4B5563 !important;
+    font-weight: 500 !important;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: #FA6400 !important;
+    border-bottom-color: #FA6400 !important;
+    font-weight: 700 !important;
+}
+
+/* Radio active item highlight */
+[data-testid="stRadio"] [aria-checked="true"] {
+    color: #FA6400 !important;
+    font-weight: 600 !important;
+}
+</style>
+""")
+
+# ─────────────────────────────────────────────────────────
 # Cached Data Loaders
 # ─────────────────────────────────────────────────────────
 @st.cache_data
@@ -125,27 +217,41 @@ ROUTE_COLORS = {
 # ─────────────────────────────────────────────────────────
 # Top GraphStudio Header Banner (Matching image.png)
 # ─────────────────────────────────────────────────────────
-head_left, head_center, head_right = st.columns([2.5, 3, 2.5])
-with head_left:
-    st.markdown("### 🐅 **GraphStudio** `v4.2.5`")
-    st.caption("TigerGraph Community Edition · Enterprise Graph AI")
-with head_center:
-    st.markdown("<div style='text-align: center; padding-top: 10px;'>", unsafe_allow_html=True)
-    st.markdown(":green-badge[:material/database: graph: fraud_investigation (superuser)] :blue-badge[:material/cable: port: 14240]")
-    st.markdown("</div>", unsafe_allow_html=True)
-with head_right:
-    st.markdown("<div style='text-align: right; padding-top: 5px;'>", unsafe_allow_html=True)
-    st.link_button("🌐 Open GraphStudio in Browser", STUDIO_URL)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-st.markdown("---")
+st.html("""
+<div style="display:flex; align-items:center; justify-content:space-between; background:#FFFFFF; padding:12px 24px; border-radius:6px; border:1px solid #E5E7EB; margin-bottom:18px; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span style="font-size:26px;">🐅</span>
+    <div>
+      <span style="font-size:22px; font-weight:800; color:#FA6400; letter-spacing:-0.5px;">Graph</span><span style="font-size:22px; font-weight:800; color:#1F2937; letter-spacing:-0.5px;">Studio</span>
+      <span style="font-size:11px; background:#F3F4F6; color:#6B7280; padding:3px 8px; border-radius:12px; margin-left:8px; border:1px solid #E5E7EB; font-weight:600;">Version: 4.2.5</span>
+    </div>
+  </div>
+  <div style="display:flex; align-items:center; gap:16px;">
+    <div style="display:flex; align-items:center; gap:10px; background:#F8FAFC; border:1px solid #CBD5E1; padding:6px 16px; border-radius:24px;">
+      <div style="width:24px; height:24px; border-radius:50%; background:#10B981; color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">F</div>
+      <div style="text-align:left; line-height:1.2;">
+        <div style="font-size:13px; font-weight:700; color:#0F172A;">fraud_investigation</div>
+        <div style="font-size:10px; color:#64748B;">superuser</div>
+      </div>
+    </div>
+    <a href="http://localhost:14240/studio/#/schema-designer?graph=fraud_investigation" target="_blank" style="text-decoration:none; background:#FA6400; color:#FFFFFF; padding:7px 14px; border-radius:4px; font-size:12px; font-weight:600;">🌐 Open Studio</a>
+  </div>
+</div>
+""")
 
 # ─────────────────────────────────────────────────────────
 # Sidebar Navigation (Mirrored from GraphStudio in image.png)
 # ─────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("### 🐅 **GraphStudio Menu**")
-    st.caption("Active Graph: `fraud_investigation`")
+    st.html("""
+    <div style="display:flex; align-items:center; gap:10px; background:#F8FAFC; border:1px solid #E2E8F0; padding:10px 12px; border-radius:8px; margin-bottom:12px;">
+      <div style="width:28px; height:28px; border-radius:50%; background:#10B981; color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">F</div>
+      <div style="line-height:1.2;">
+        <div style="font-size:13px; font-weight:700; color:#0F172A;">fraud_investigation</div>
+        <div style="font-size:11px; color:#64748B;">superuser</div>
+      </div>
+    </div>
+    """)
 
     page = st.radio(
         "GraphStudio Modules",

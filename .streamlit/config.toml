@@ -1,22 +1,22 @@
-# Professional Financial Dashboard Theme (Dark)
-# Conservative, trustworthy palette with clear data visualization
+# TigerGraph GraphStudio Authentic Theme (Light / Studio Canvas)
+# Matches TigerGraph GraphStudio v4.2.5 UI design
 
 [theme]
-base = "dark"
-primaryColor = "#60A5FA"             # Bright blue for dark mode
-backgroundColor = "#0F172A"          # Deep slate
-secondaryBackgroundColor = "#1E293B" # Slightly lighter slate
-codeBackgroundColor = "#1E293B"
-textColor = "#F1F5F9"                # Light text
-linkColor = "#60A5FA"
-borderColor = "#334155"
-codeTextColor = "#CBD5E1"
+base = "light"
+primaryColor = "#FA6400"              # TigerGraph signature orange
+backgroundColor = "#F3F4F6"           # GraphStudio canvas neutral studio gray
+secondaryBackgroundColor = "#FFFFFF"  # Crisp white sidebar, cards, and toolbars
+codeBackgroundColor = "#FFFFFF"
+textColor = "#1F2937"                 # Crisp slate/charcoal text
+linkColor = "#FA6400"
+borderColor = "#E5E7EB"
+codeTextColor = "#1F2937"
 showWidgetBorder = true
 showSidebarBorder = true
-baseRadius = "6px"                   # Subtle rounding - professional
-buttonRadius = "6px"
+baseRadius = "4px"
+buttonRadius = "4px"
 
-# Typography - Clean, professional fonts
+# Typography
 font = "'Inter':https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
 headingFont = "'Inter':https://fonts.googleapis.com/css2?family=Inter:wght@600;700&display=swap"
 codeFont = "'JetBrains Mono':https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
@@ -27,32 +27,34 @@ headingFontSizes = ["28px", "22px", "18px", "16px", "14px", "12px"]
 headingFontWeights = [700, 600, 600, 600, 500, 500]
 linkUnderline = false
 
-# Semantic colors for financial indicators
-greenColor = "#34D399"  # Positive/gains - bright green
-redColor = "#F87171"    # Negative/losses - bright red
-yellowColor = "#FBBF24" # Warnings/caution
-orangeColor = "#FB923C" # Alerts
-blueColor = "#60A5FA"   # Informational
-violetColor = "#A78BFA" # Accent/highlights
-grayColor = "#94A3B8"   # Neutral/secondary text
+# TigerGraph GraphStudio palette
+orangeColor = "#FA6400"
+blueColor = "#2563EB"
+greenColor = "#059669"
+redColor = "#DC2626"
+yellowColor = "#D97706"
+violetColor = "#7C3AED"
+grayColor = "#6B7280"
 
-# Chart colors - Distinguishable palette for financial data
+# Charts palette
 chartCategoricalColors = [
-    "#60A5FA",
-    "#34D399",
-    "#A78BFA",
-    "#F87171",
-    "#FBBF24",
-    "#38BDF8",
-    "#94A3B8",
-    "#FB923C",
+    "#FA6400",
+    "#2563EB",
+    "#059669",
+    "#7C3AED",
+    "#DC2626",
+    "#D97706",
+    "#6B7280",
 ]
 
-# Sidebar
+dataframeBorderColor = "#E5E7EB"
+dataframeHeaderBackgroundColor = "#F9FAFB"
+
+# Sidebar — Crisp white with subtle border and orange active accent
 [theme.sidebar]
-backgroundColor = "#0F172A"
-secondaryBackgroundColor = "#1E293B"
-codeBackgroundColor = "#1E293B"
-textColor = "#F1F5F9"
-borderColor = "#334155"
-primaryColor = "#60A5FA"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F8FAFC"
+codeBackgroundColor = "#F1F5F9"
+textColor = "#1F2937"
+borderColor = "#E5E7EB"
+primaryColor = "#FA6400"
