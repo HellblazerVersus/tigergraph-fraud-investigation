@@ -1,0 +1,82 @@
+{
+  "case_id": "HHG-016",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 1.0,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3534820"
+    ],
+    "first_suspicious_txn_id": "3534820",
+    "connected_card_ids": [],
+    "connected_device_profiles": [
+      "D4AA2D26B64"
+    ],
+    "exposure_usd": 59.67,
+    "evidence": [
+      {
+        "claim": "Customer C09988 explicitly denies making the $59.67 online purchase (transaction 3534820).",
+        "source": "customer",
+        "ref": "query:Customer C09988 message",
+        "entity_ids": [
+          "C09988",
+          "3534820"
+        ]
+      },
+      {
+        "claim": "Policy R2 mandates blocking the card and creating a case when a customer denies a transaction.",
+        "source": "document",
+        "ref": "policy_rules",
+        "entity_ids": [
+          "C09988-K1"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Customer C09988 reported an unauthorized card-not-present transaction of $59.67 on card C09988-K1. Investigation confirmed the activity as fraudulent. The card was blocked at L1 and the case was officially logged as fraud.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-016-1790192099"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Policy R2: Customer denies transaction -> BLOCK_CARD + CREATE_CASE."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Policy R2 / policy_cases_vs_sars: Open case upon customer dispute or customer denial."
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Policy R2: Customer denies transaction -> BLOCK_CARD + CREATE_CASE."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Policy R2 / policy_cases_vs_sars: Open case upon customer dispute or customer denial."
+      }
+    ],
+    "what_changed": "No changes; initial recommendations confirmed."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Exposure is $59.67, which is below the $1,000 threshold, and there is no shared fraud ring or coordinated undocumented pattern.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Investigation completed under Policy Section 6. Fraud confirmed by customer dispute with exposure below SAR filing threshold; standard card block and case creation executed.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 5.41
+}

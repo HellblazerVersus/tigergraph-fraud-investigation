@@ -1,0 +1,92 @@
+{
+  "case_id": "HHG-015",
+  "case": {
+    "status": "escalated",
+    "verdict": "uncertain",
+    "fraud_probability": 0.77,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3464869"
+    ],
+    "first_suspicious_txn_id": "3464869",
+    "connected_card_ids": [],
+    "connected_device_profiles": [
+      "DCBB47EA1E4"
+    ],
+    "exposure_usd": 599.94,
+    "evidence": [
+      {
+        "claim": "Transaction 3464869 was scored at a high risk of 0.77 for an online purchase of $599.94 using anonymous email domain.",
+        "source": "graph",
+        "ref": "query:card_window",
+        "entity_ids": [
+          "3464869",
+          "C03042-K1"
+        ]
+      },
+      {
+        "claim": "Policy R1 mandates verification before block on weak signal when probability < 0.70 (score is 0.77, which exceeds 0.70, but exposure is $599.94 > $500).",
+        "source": "document",
+        "ref": "policy_rules",
+        "entity_ids": [
+          "policy_rules"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Transaction 3464869 for $599.94 was flagged with a fraud probability of 0.77 under the card_not_present_fraud pattern. As the status is uncertain and exposure exceeds $500, the case requires customer verification and analyst escalation.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-015-1790192092"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Fraud probability >= 0.30 per policy_cases_vs_sars."
+      },
+      {
+        "action": "VERIFY_WITH_CUSTOMER",
+        "route": "auto",
+        "reason": "Uncertain transaction with exposure > $500 requires verification per R1 / R8."
+      },
+      {
+        "action": "ESCALATE_TO_ANALYST",
+        "route": "auto",
+        "reason": "Uncertain status with exposure > $500 per policy rule R8."
+      }
+    ],
+    "final": [
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Fraud probability >= 0.30 per policy_cases_vs_sars."
+      },
+      {
+        "action": "VERIFY_WITH_CUSTOMER",
+        "route": "auto",
+        "reason": "Uncertain transaction with exposure > $500 requires verification per R1 / R8."
+      },
+      {
+        "action": "ESCALATE_TO_ANALYST",
+        "route": "auto",
+        "reason": "Uncertain status with exposure > $500 per policy rule R8."
+      }
+    ],
+    "what_changed": "No changes; initial recommendations confirmed."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Exposure of $599.94 is below the $1,000 threshold and fraud is not yet definitively confirmed, pending customer verification.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Case has been escalated to an analyst for further review and pending customer verification per Policy Section 6.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 5.72
+}

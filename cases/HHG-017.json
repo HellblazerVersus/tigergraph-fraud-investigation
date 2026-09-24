@@ -1,0 +1,101 @@
+{
+  "case_id": "HHG-017",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.82,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3450629"
+    ],
+    "first_suspicious_txn_id": "3450629",
+    "connected_card_ids": [],
+    "connected_device_profiles": [
+      "DEC9EF04AA0"
+    ],
+    "exposure_usd": 100.09,
+    "evidence": [
+      {
+        "claim": "Real-time model scored transaction 3450629 ($100.09, online) at 0.57, which is above the 0.30 threshold to create a case.",
+        "source": "document",
+        "ref": "policy_cases_vs_sars",
+        "entity_ids": [
+          "3450629"
+        ]
+      },
+      {
+        "claim": "Fraud probability is below 0.70 with a single weak signal, requiring verification before blocking.",
+        "source": "document",
+        "ref": "policy_rules",
+        "entity_ids": [
+          "3450629"
+        ]
+      },
+      {
+        "claim": "Customer contacted via SMS and denied initiating the flagged transaction.",
+        "source": "customer",
+        "ref": "evidence_request:1",
+        "entity_ids": [
+          "C04570-K1",
+          "C04570"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Customer C04570 reported that the $100.09 online transaction 3450629 on card C04570-K1 was unauthorized. The fraud pattern was confirmed as card_not_present_fraud. Consequently, the transaction was declined and the card was blocked.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-017-1790192107"
+  },
+  "evidence_requests": [
+    {
+      "type": "customer_validation",
+      "asked_after_step": 1,
+      "assumed_response": "Customer denied the purchase"
+    }
+  ],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "VERIFY_WITH_CUSTOMER",
+        "route": "auto",
+        "reason": "R1: Verify before block on weak signal (prob < 0.70, single signal)."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Fraud probability >= 0.30 requires creating a case."
+      }
+    ],
+    "final": [
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: Confirmed fraud requires creating graph case record."
+      },
+      {
+        "action": "DECLINE_TRANSACTION",
+        "route": "L1",
+        "reason": "R1: Customer confirmed they did not make the online purchase; transaction 3450629 must be declined."
+      },
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: Confirmed unauthorized card-not-present fraud on card C04570-K1 with exposure of $100.09 (<= $2500 threshold)."
+      }
+    ],
+    "what_changed": "Initial verification prompted the customer confirmation, leading to final actions of declining the fraudulent transaction and blocking the compromised card."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Exposure is $100.09 (well below the $1,000 threshold), no fraud ring or coordinated/undocumented pattern is present, and fraud is not strongly suspected beyond a standard single-card unauthorized CNP event.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Investigation completed following customer verification confirming unauthorized card-not-present activity, resulting in transaction declination and card blocking per Policy Section 6.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 5.38
+}

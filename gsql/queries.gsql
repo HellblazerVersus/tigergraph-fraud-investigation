@@ -1,0 +1,119 @@
+// ============================================================
+// GSQL Stored Procedures — HHGOA Fraud Investigation
+// ============================================================
+
+USE GRAPH fraud_investigation
+
+// Q1. Card transaction history window
+CREATE OR REPLACE QUERY card_window(STRING card_id, INT hours = 48) FOR GRAPH fraud_investigation {
+  ListAccum<EDGE> @@edge_list;
+  start = {Card.*};
+  cards = SELECT c FROM start:c WHERE c.card_id == card_id;
+  txns = SELECT t
+    FROM cards:c -(MADE:e)- Transaction:t
+    WHERE datetime_diff(now(), t.ts) <= hours * 3600;
+  PRINT txns;
+}
+
+// Q2. Transaction subgraph — card, device, region context
+CREATE OR REPLACE QUERY txn_subgraph(STRING txn_id) FOR GRAPH fraud_investigation {
+  start = {Transaction.*};
+  seed = SELECT t FROM start:t WHERE t.txn_id == txn_id;
+  cards = SELECT c FROM seed:t -(MADE_BY:e)- Card:c;
+  devices = SELECT d FROM seed:t -(FROM_DEVICE:e)- DeviceProfile:d;
+  regions = SELECT r FROM seed:t -(BILLED_IN:e)- BillingRegion:r;
+  PRINT seed, cards, devices, regions;
+}
+
+// Q3. Device neighbors — other cards using same device
+CREATE OR REPLACE QUERY device_neighbors(STRING txn_id, INT days = 90) FOR GRAPH fraud_investigation {
+  start = {Transaction.*};
+  seed = SELECT t FROM start:t WHERE t.txn_id == txn_id;
+  devices = SELECT d FROM seed:t -(FROM_DEVICE:e)- DeviceProfile:d;
+  other_txns = SELECT t2
+    FROM devices:d -(DEVICE_USED_IN:e)- Transaction:t2
+    WHERE datetime_diff(now(), t2.ts) <= days * 86400;
+  other_cards = SELECT c FROM other_txns:t -(MADE_BY:e)- Card:c;
+  PRINT devices, other_txns, other_cards;
+}
+
+// Q4. Velocity check — transaction count and sum in time window
+CREATE OR REPLACE QUERY velocity_check(STRING card_id, INT hours = 24) FOR GRAPH fraud_investigation {
+  SumAccum<INT> @@txn_count;
+  SumAccum<FLOAT> @@total_amount;
+  start = {Card.*};
+  cards = SELECT c FROM start:c WHERE c.card_id == card_id;
+  txns = SELECT t
+    FROM cards:c -(MADE:e)- Transaction:t
+    WHERE datetime_diff(now(), t.ts) <= hours * 3600
+    ACCUM @@txn_count += 1, @@total_amount += t.amount;
+  PRINT @@txn_count, @@total_amount, txns;
+}
+
+// Q5. Customer history — all cards and transactions for a customer
+CREATE OR REPLACE QUERY customer_history(STRING customer_id) FOR GRAPH fraud_investigation {
+  start = {Customer.*};
+  custs = SELECT c FROM start:c WHERE c.customer_id == customer_id;
+  cards = SELECT card FROM custs:c -(OWNS:e)- Card:card;
+  txns = SELECT t FROM cards:card -(MADE:e)- Transaction:t;
+  PRINT custs, cards, txns;
+}
+
+// Q6. Region history — out-of-region transactions for a card
+CREATE OR REPLACE QUERY region_history(STRING card_id, INT days = 90) FOR GRAPH fraud_investigation {
+  SumAccum<INT> @@home_count;
+  SumAccum<INT> @@foreign_count;
+  start = {Card.*};
+  cards = SELECT c FROM start:c WHERE c.card_id == card_id;
+  txns = SELECT t
+    FROM cards:c -(MADE:e)- Transaction:t
+    WHERE datetime_diff(now(), t.ts) <= days * 86400
+    ACCUM CASE WHEN t.addr2 == 87 THEN @@home_count += 1
+               ELSE @@foreign_count += 1
+          END;
+  PRINT @@home_count, @@foreign_count, txns;
+}
+
+// Q7. Similar closed cases — by pattern
+CREATE OR REPLACE QUERY similar_closed_cases(STRING pattern_name, INT limit_n = 5) FOR GRAPH fraud_investigation {
+  start = {ClosedCase.*};
+  cases = SELECT c
+    FROM start:c
+    WHERE c.pattern == pattern_name AND c.outcome == "confirmed_fraud"
+    LIMIT limit_n;
+  PRINT cases;
+}
+
+// Q8. Write fraud case result to graph
+CREATE OR REPLACE QUERY write_fraud_case(
+  STRING case_id, STRING source_case_pack_id,
+  STRING customer_id, STRING card_id,
+  STRING status, STRING verdict,
+  FLOAT fraud_probability, STRING pattern,
+  STRING pattern_description, STRING first_suspicious_txn_id,
+  FLOAT exposure_usd, STRING summary, STRING stop_reason
+) FOR GRAPH fraud_investigation {
+  INSERT INTO FraudCase VALUES (
+    case_id, source_case_pack_id, customer_id, card_id,
+    now(), status, verdict, fraud_probability,
+    pattern, pattern_description, first_suspicious_txn_id,
+    exposure_usd, summary, stop_reason, true
+  );
+  PRINT "Case written: " + case_id;
+}
+
+// Q9. Card testing check — many small txns in short window
+CREATE OR REPLACE QUERY card_testing_check(STRING card_id, INT hours = 24, FLOAT amount_threshold = 10.0) FOR GRAPH fraud_investigation {
+  SumAccum<INT> @@small_count;
+  SumAccum<INT> @@total_count;
+  start = {Card.*};
+  cards = SELECT c FROM start:c WHERE c.card_id == card_id;
+  txns = SELECT t
+    FROM cards:c -(MADE:e)- Transaction:t
+    WHERE datetime_diff(now(), t.ts) <= hours * 3600
+    ACCUM @@total_count += 1,
+          CASE WHEN t.amount <= amount_threshold THEN @@small_count += 1 END;
+  PRINT @@small_count, @@total_count;
+}
+
+INSTALL QUERY card_window, customer_history, velocity_check, region_history, similar_closed_cases, card_testing_check

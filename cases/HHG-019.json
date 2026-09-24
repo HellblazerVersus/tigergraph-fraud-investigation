@@ -1,0 +1,98 @@
+{
+  "case_id": "HHG-019",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.9,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3503878"
+    ],
+    "first_suspicious_txn_id": "3503878",
+    "connected_card_ids": [
+      "C07987-K1"
+    ],
+    "connected_device_profiles": [
+      "DF1763B597E"
+    ],
+    "exposure_usd": 99.92,
+    "evidence": [
+      {
+        "claim": "Transaction 3503878 is an online card-not-present transaction of $99.92 scored with a high risk score of 0.90.",
+        "source": "graph",
+        "ref": "query:card_window",
+        "entity_ids": [
+          "3503878"
+        ]
+      },
+      {
+        "claim": "Fraud policy states CREATE_CASE is required when fraud probability >= 0.30.",
+        "source": "document",
+        "ref": "policy_cases_vs_sars",
+        "entity_ids": [
+          "policy_cases_vs_sars"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Case HHG-019 involved a flagged online transaction of $99.92 on card C07987-K2 which was confirmed as card_not_present_fraud with a 0.90 probability. The transaction was declined, the compromised card was blocked, and connected cards were placed under monitoring. As exposure remained below $1,000 without ring coordination, no SAR was required and the case was successfully closed.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-019-1790192124"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Fraud probability >= 0.30 according to Policy policy_cases_vs_sars."
+      },
+      {
+        "action": "VERIFY_WITH_CUSTOMER",
+        "route": "auto",
+        "reason": "Single high-risk online transaction signal requiring verification per Policy R1."
+      }
+    ],
+    "final": [
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Fraud probability >= 0.30 according to Policy policy_cases_vs_sars."
+      },
+      {
+        "action": "DECLINE_TRANSACTION",
+        "route": "L1",
+        "reason": "Unauthorized online purchase identified as card_not_present_fraud requiring transaction declination under Policy R1."
+      },
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Exposure is $99.92 (<= $2500) on confirmed fraud pattern card_not_present_fraud, requiring card block under Policy R1 and R2."
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "route": "auto",
+        "reason": "Connected card monitoring triggered to protect associated cards on the account per Policy R4."
+      },
+      {
+        "action": "GENERATE_REPORT",
+        "route": "auto",
+        "reason": "Mandatory reporting generation for confirmed fraud case under Policy R7."
+      }
+    ],
+    "what_changed": "Added DECLINE_TRANSACTION, BLOCK_CARD, MONITOR_CONNECTED_CARDS, and GENERATE_REPORT to finalize containment and mitigation for the confirmed card_not_present_fraud case."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Exposure ($99.92) is well below the $1,000 threshold and the fraud pattern does not involve a shared fraud ring or coordinated/undocumented multi-account attack.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Investigation completed per Policy Section 6 after fully mitigating confirmed single-card online fraud under $2,500 threshold with no SAR requirement.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 6.06
+}

@@ -1,0 +1,89 @@
+{
+  "case_id": "HHG-008",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 1.0,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3558054"
+    ],
+    "first_suspicious_txn_id": "3558054",
+    "connected_card_ids": [
+      "C13171-K1"
+    ],
+    "connected_device_profiles": [
+      "D3F24371587"
+    ],
+    "exposure_usd": 55.68,
+    "evidence": [
+      {
+        "claim": "Customer C13171 explicitly denies making transaction 3558054 ($55.68).",
+        "source": "customer",
+        "ref": "query:Customer C13171 message",
+        "entity_ids": [
+          "C13171",
+          "3558054"
+        ]
+      },
+      {
+        "claim": "Policy R2 states that when a customer denies a transaction, it results in BLOCK_CARD + CREATE_CASE.",
+        "source": "document",
+        "ref": "policy_rules",
+        "entity_ids": [
+          "policy_rules"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Customer C13171 reported an unauthorized online transaction of $55.68 on card C13171-K2. Investigation confirmed unauthorized card-not-present fraud, prompting the card to be blocked and a case created. Connected card C13171-K1 will also be monitored for secondary risks.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-008-1790192034"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Policy R2: Customer denies transaction -> BLOCK_CARD + CREATE_CASE."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Policy R2 & policy_cases_vs_sars: Open case on customer dispute / customer denial."
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Policy R2: Customer denies transaction -> BLOCK_CARD + CREATE_CASE."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Policy R2 & policy_cases_vs_sars: Open case on customer dispute / customer denial."
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "route": "auto",
+        "reason": "Policy R3: Monitor connected card C13171-K1 for secondary compromise risks."
+      }
+    ],
+    "what_changed": "Added MONITOR_CONNECTED_CARDS for connected card C13171-K1 to ensure comprehensive protection against potential cross-card compromise following the customer dispute."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Exposure of $55.68 is well below the $1,000 SAR filing threshold, and there is no evidence of a fraud ring, coordinated attack, or undocumented pattern.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Policy Section 6: Investigation concluded as fraudulent card-not-present activity is confirmed by customer dispute, the affected card has been blocked, and exposure is below SAR thresholds.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 6.23
+}

@@ -1,0 +1,70 @@
+{
+  "case_id": "HHG-007",
+  "case": {
+    "status": "closed_legitimate",
+    "verdict": "legitimate",
+    "fraud_probability": 0.2,
+    "pattern": "none",
+    "pattern_description": "",
+    "affected_txn_ids": [],
+    "first_suspicious_txn_id": "",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 0.0,
+    "evidence": [
+      {
+        "claim": "Transaction 3514948 occurs in billing region 264, which is the cardholder's frequent and historical billing region with numerous prior in-person transactions.",
+        "source": "graph",
+        "ref": "query:card_window",
+        "entity_ids": [
+          "3514948",
+          "C09933-K2",
+          "264"
+        ]
+      },
+      {
+        "claim": "The transaction amount ($111.92) and channel (in-person, product code W) are consistent with the cardholder's established spending behavior and regular transaction history on card C09933-K2.",
+        "source": "graph",
+        "ref": "query:card_window",
+        "entity_ids": [
+          "3514948",
+          "C09933-K2"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Case HHG-007 involved a real-time fraud alert on transaction 3514948 for $111.92, which initially scored 0.87. TigerGraph data and customer history confirmed the activity was consistent with normal in-person spending patterns in a known region. The investigation concluded that the transaction was legitimate, resulting in a false alarm closure with no financial exposure.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-007-1790192026"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "ALLOW_TRANSACTION",
+        "route": "auto",
+        "reason": "The transaction is consistent with historical in-person spending patterns in a known region for this cardholder, and fraud probability is low based on consistent activity."
+      }
+    ],
+    "final": [
+      {
+        "action": "CLOSE_NO_FRAUD",
+        "route": "auto",
+        "reason": "The transaction and card activity were verified as legitimate customer behavior in accordance with Policy R3, confirming the initial assessment and finding no evidence of unauthorized use."
+      }
+    ],
+    "what_changed": "No changes; initial recommendations confirmed."
+  },
+  "sar": {
+    "file": false,
+    "reason": "The transaction was verified as legitimate customer activity with zero fraud exposure, meaning no Suspicious Activity Report is required under Bank Policy R3.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Investigation is closed because the flagged transaction and card history were thoroughly reviewed and verified as legitimate customer activity with a low fraud probability, satisfying Policy Section 6 for false positives.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 5.6
+}

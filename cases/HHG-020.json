@@ -1,0 +1,108 @@
+{
+  "case_id": "HHG-020",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.77,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3509359"
+    ],
+    "first_suspicious_txn_id": "3509359",
+    "connected_card_ids": [
+      "C12265-K1"
+    ],
+    "connected_device_profiles": [
+      "D0C70993864"
+    ],
+    "exposure_usd": 125.08,
+    "evidence": [
+      {
+        "claim": "Transaction 3509359 is an online purchase for $125.08 scored at 0.52 risk, meeting the threshold for case creation under policy_cases_vs_sars.",
+        "source": "graph",
+        "ref": "query:card_window",
+        "entity_ids": [
+          "3509359"
+        ]
+      },
+      {
+        "claim": "Fraud probability is < 0.70 with a single weak/uncertain signal, triggering policy rule R1 requiring verification before blocking.",
+        "source": "document",
+        "ref": "policy_rules",
+        "entity_ids": [
+          "3509359"
+        ]
+      },
+      {
+        "claim": "Customer contacted via SMS and denied initiating the flagged transaction.",
+        "source": "customer",
+        "ref": "evidence_request:1",
+        "entity_ids": [
+          "C12265-K2",
+          "C12265"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Transaction 3509359 ($125.08) was flagged as card-not-present fraud. Customer validation confirmed the purchase was unauthorized. The transaction was declined, the compromised card was blocked, and connected cards were placed under monitoring.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-020-1790192132"
+  },
+  "evidence_requests": [
+    {
+      "type": "customer_validation",
+      "asked_after_step": 1,
+      "assumed_response": "Customer denied the purchase"
+    }
+  ],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "VERIFY_WITH_CUSTOMER",
+        "route": "auto",
+        "reason": "Policy R1: Verify before block on weak signal (prob < 0.70, single signal)."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Fraud probability >= 0.30 triggers case creation per policy_cases_vs_sars."
+      }
+    ],
+    "final": [
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: Confirmed fraud requires creating graph case record."
+      },
+      {
+        "action": "DECLINE_TRANSACTION",
+        "route": "L1",
+        "reason": "Policy R1: Decline fraudulent card-not-present transaction upon customer confirmation of denial."
+      },
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Policy R1 & R2: Block compromised card C12265-K2 since exposure ($125.08) <= $2,500 threshold."
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "route": "auto",
+        "reason": "Policy R3: Monitor connected card C12265-K1 for potential secondary compromise."
+      }
+    ],
+    "what_changed": "Initial actions verified the transaction with the customer; following the customer's denial, final actions escalated to decline the transaction, block the compromised card, and monitor connected cards."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Exposure ($125.08) is well below the $1,000 threshold and no fraud ring or coordinated/undocumented pattern is present.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Investigation concluded as fraud was confirmed via customer validation and appropriate containment actions (card block and transaction decline) were executed within L1 authorization limits per Policy Section 6.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 4.97
+}

@@ -1,0 +1,105 @@
+{
+  "case_id": "HHG-014",
+  "case": {
+    "status": "closed_legitimate",
+    "verdict": "legitimate",
+    "fraud_probability": 0.08,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3478561"
+    ],
+    "first_suspicious_txn_id": "3478561",
+    "connected_card_ids": [],
+    "connected_device_profiles": [
+      "D7E7AC97B83"
+    ],
+    "exposure_usd": 74.96,
+    "evidence": [
+      {
+        "claim": "Transaction 3478561 is an online purchase of $74.96 on card C13487-K1 utilizing device D7E7AC97B83, which connects to multiple other transactions this month.",
+        "source": "graph",
+        "ref": "query:card_window",
+        "entity_ids": [
+          "3478561",
+          "C13487-K1",
+          "D7E7AC97B83"
+        ]
+      },
+      {
+        "claim": "Analyst request notes several cards this month showing purchases from the same unusual device profile.",
+        "source": "document",
+        "ref": "Analyst request",
+        "entity_ids": [
+          "3478561",
+          "C13487-K1"
+        ]
+      },
+      {
+        "claim": "Policy R8 states uncertain cases with conflicting evidence or exposure require escalation to analyst.",
+        "source": "document",
+        "ref": "policy_rules",
+        "entity_ids": []
+      },
+      {
+        "claim": "Customer contacted via SMS and confirmed initiating the transaction as authorized.",
+        "source": "customer",
+        "ref": "evidence_request:1",
+        "entity_ids": [
+          "C13487-K1",
+          "C13487"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Transaction 3478561 on card C13487-K1 was flagged due to an unusual shared device profile across multiple cards. Customer validation confirmed the purchase was authorized by the cardholder. The case has been closed as a false alarm with no fraud detected.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-014-1790192082"
+  },
+  "evidence_requests": [
+    {
+      "type": "customer_validation",
+      "asked_after_step": 1,
+      "assumed_response": "Customer confirmed the purchase"
+    }
+  ],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Fraud probability >= 0.30 or analyst request / evidence gathering requirement per policy_cases_vs_sars."
+      },
+      {
+        "action": "ESCALATE_TO_ANALYST",
+        "route": "auto",
+        "reason": "Uncertain case with unusual shared device profile across multiple cards per R8."
+      }
+    ],
+    "final": [
+      {
+        "action": "ALLOW_TRANSACTION",
+        "route": "auto",
+        "reason": "Customer validated and confirmed the purchase; transaction is legitimate per Policy R3."
+      },
+      {
+        "action": "CLOSE_NO_FRAUD",
+        "route": "auto",
+        "reason": "Investigation concluded that the flagged activity was legitimate customer behavior per Policy R3."
+      }
+    ],
+    "what_changed": "Initial actions recommended case creation and escalation due to shared device concerns, but customer validation confirmed the purchase was authorized, leading to transaction allowance and case closure as legitimate."
+  },
+  "sar": {
+    "file": false,
+    "reason": "No fraud detected as the customer confirmed the transaction; SAR filing criteria are not met.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Investigation complete; customer validation confirmed legitimacy, satisfying Policy Section 6 resolution criteria for false alarms.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 7.62
+}

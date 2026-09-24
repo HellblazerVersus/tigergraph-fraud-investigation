@@ -1,0 +1,87 @@
+{
+  "case_id": "HHG-004",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 1.0,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3583227"
+    ],
+    "first_suspicious_txn_id": "3583227",
+    "connected_card_ids": [],
+    "connected_device_profiles": [
+      "DB3A050B63B"
+    ],
+    "exposure_usd": 128.33,
+    "evidence": [
+      {
+        "claim": "Customer C08106 explicitly denied making transaction 3583227 ($128.33).",
+        "source": "customer",
+        "ref": "Customer C08106 message: 'I never made this $128.33 purchase. Please check my card.' Refers to 3583227.",
+        "entity_ids": [
+          "C08106",
+          "3583227"
+        ]
+      },
+      {
+        "claim": "Policy R2 mandates blocking the card and creating a case when the customer denies a transaction.",
+        "source": "document",
+        "ref": "policy_rules",
+        "entity_ids": [
+          "policy_rules"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Customer C08106 reported an unauthorized $128.33 purchase (Txn 3583227) on card C08106-K1. TigerGraph records and customer denial confirm card_not_present_fraud (Probability 1.00). The card has been blocked and the case is closed as confirmed fraud.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-004-1790192000"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Policy R2: Customer denies -> BLOCK_CARD + CREATE_CASE."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Policy R2: Customer denies -> BLOCK_CARD + CREATE_CASE."
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Policy R2: Customer denies transaction -> BLOCK_CARD."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Policy R2: Customer denies transaction -> CREATE_CASE."
+      },
+      {
+        "action": "GENERATE_REPORT",
+        "route": "auto",
+        "reason": "Policy R4: Generate incident report for confirmed unauthorized card-not-present fraud."
+      }
+    ],
+    "what_changed": "Added GENERATE_REPORT as required under Policy R4 for confirmed card_not_present_fraud cases."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Exposure of $128.33 is well below the $1,000 threshold and the incident involves a single isolated card-not-present unauthorized transaction without a shared fraud ring or coordinated undocumented pattern.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Investigation is finalized in accordance with Policy Section 6 after confirming unauthorized card-not-present fraud, blocking the compromised card, and generating the incident report.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 6.35
+}

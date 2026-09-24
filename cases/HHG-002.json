@@ -1,0 +1,94 @@
+{
+  "case_id": "HHG-002",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.79,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3478782"
+    ],
+    "first_suspicious_txn_id": "3478782",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 292.36,
+    "evidence": [
+      {
+        "claim": "Transaction 3478782 is an online transaction with an amount of $292.36 and a high risk score of 0.79.",
+        "source": "graph",
+        "ref": "query:card_window",
+        "entity_ids": [
+          "3478782"
+        ]
+      },
+      {
+        "claim": "Fraud probability >= 0.30 requires opening a case per policy policy_cases_vs_sars.",
+        "source": "document",
+        "ref": "policy_cases_vs_sars",
+        "entity_ids": [
+          "policy_cases_vs_sars"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Case HHG-002 involved a flagged online transaction of $292.36 on card C11891-K1 exhibiting card_not_present_fraud at a fraud probability of 0.79. Investigation confirmed the activity was unauthorized. The transaction was declined, the card was blocked at the L1 level, and the customer was warned.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-002-1790191984"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Fraud probability >= 0.30 (0.79) triggers automatic case creation per Policy policy_cases_vs_sars."
+      },
+      {
+        "action": "DECLINE_TRANSACTION",
+        "route": "L1",
+        "reason": "High risk online transaction (0.79) requiring review and action."
+      },
+      {
+        "action": "VERIFY_WITH_CUSTOMER",
+        "route": "auto",
+        "reason": "Uncertain / high risk online transaction requiring customer verification per Policy R1."
+      }
+    ],
+    "final": [
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Fraud probability >= 0.30 (0.79) triggers automatic case creation per Policy policy_cases_vs_sars."
+      },
+      {
+        "action": "DECLINE_TRANSACTION",
+        "route": "L1",
+        "reason": "High risk online transaction (0.79) confirmed as unauthorized card-not-present fraud per Policy R1."
+      },
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Exposure is $292.36 (<= $2500), requiring L1 authorization to block compromised card C11891-K1 per Policy R1 and L1 limits."
+      },
+      {
+        "action": "WARN_CUSTOMER",
+        "route": "auto",
+        "reason": "Notify customer of unauthorized online transaction attempt and card block per Policy R1."
+      }
+    ],
+    "what_changed": "Added BLOCK_CARD via L1 route since exposure is $292.36 (below the $2,500 threshold for L2) and fraud is confirmed for card-not-present activity."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Exposure of $292.36 is below the $1,000 SAR filing threshold, and the pattern is standard single-card card-not-present fraud without ring involvement.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Investigation completed per Policy Section 6: unauthorized card-not-present transaction blocked, compromised card blocked by L1 analyst, and customer warned.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 7.23
+}

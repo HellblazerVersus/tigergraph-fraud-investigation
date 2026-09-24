@@ -1,0 +1,81 @@
+{
+  "case_id": "HHG-018",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 1.0,
+    "pattern": "out_of_region_use",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3491361"
+    ],
+    "first_suspicious_txn_id": "3491361",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 39.08,
+    "evidence": [
+      {
+        "claim": "Customer C02354 explicitly denied making transaction 3491361 ($39.08)",
+        "source": "customer",
+        "ref": "query:Customer C02354 message: 'I never made this $39.08 purchase. Please check my card.' Refers to 3491361.",
+        "entity_ids": [
+          "C02354",
+          "3491361"
+        ]
+      },
+      {
+        "claim": "Transaction 3491361 occurred in billing region 126.0, whereas normal card activity predominantly occurs in region 325.",
+        "source": "graph",
+        "ref": "billing_region_distribution",
+        "entity_ids": [
+          "C02354-K2",
+          "3491361"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Customer C02354 reported an unauthorized $39.08 out-of-region transaction (3491361) on card C02354-K2. The investigation verified the customer's denial, confirmed the fraud pattern as out_of_region_use, and successfully executed card blocking and case creation. The case is now closed as confirmed fraud.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-018-1790192114"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Policy R2: Customer denies -> BLOCK_CARD + CREATE_CASE (exposure is under $1000 so FILE_REPORT is not required)."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Policy R2 & policy_cases_vs_sars: Open case upon customer dispute / customer denial."
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Policy R2: Customer denies the transaction, requiring card blocking."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Policy R2 & policy_cases_vs_sars: Open case upon customer dispute / customer denial."
+      }
+    ],
+    "what_changed": "No changes; initial recommendations confirmed."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Exposure is $39.08 (well under the $1,000 threshold), and there is no shared device/region/card fraud ring or coordinated/undocumented pattern.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Investigation completed with card blocked and case created per Policy R2; SAR filing criteria not met due to low exposure and lack of broader syndicate indicators.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 7.93
+}

@@ -1,0 +1,69 @@
+{
+  "case_id": "HHG-001",
+  "case": {
+    "status": "closed_legitimate",
+    "verdict": "legitimate",
+    "fraud_probability": 0.15,
+    "pattern": "none",
+    "pattern_description": "",
+    "affected_txn_ids": [],
+    "first_suspicious_txn_id": "",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 0.0,
+    "evidence": [
+      {
+        "claim": "Transaction 3514030 is an in-person Visa debit purchase for $77.07 using card C12382-K1, which is part of the cardholder's established history of regular in-person purchases in region 444 and similar billing regions.",
+        "source": "graph",
+        "ref": "query:card_window",
+        "entity_ids": [
+          "3514030",
+          "C12382-K1",
+          "C12382"
+        ]
+      },
+      {
+        "claim": "Card testing indicators show no card testing pattern for card C12382-K1.",
+        "source": "graph",
+        "ref": "card_testing_indicators",
+        "entity_ids": [
+          "C12382-K1"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Case HHG-001 investigated and resolved.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-001-1790191868"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "ALLOW_TRANSACTION",
+        "route": "auto",
+        "reason": "Fraud probability is low (0.15), supported by consistent historical in-person transaction patterns; no fraudulent indicators present."
+      }
+    ],
+    "final": [
+      {
+        "action": "ALLOW_TRANSACTION",
+        "route": "auto",
+        "reason": "Fraud probability is low (0.15), supported by consistent historical in-person transaction patterns; no fraudulent indicators present."
+      }
+    ],
+    "what_changed": "Recommendations updated based on graph evidence."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Policy threshold criteria evaluated.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Evidence settled the verdict; all required policy actions executed.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 7.83
+}

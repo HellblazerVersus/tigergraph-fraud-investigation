@@ -1,0 +1,87 @@
+{
+  "case_id": "HHG-006",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 1.0,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3476682"
+    ],
+    "first_suspicious_txn_id": "3476682",
+    "connected_card_ids": [],
+    "connected_device_profiles": [
+      "D00346C61FA"
+    ],
+    "exposure_usd": 482.12,
+    "evidence": [
+      {
+        "claim": "Customer C07297 explicitly denies making the $482.12 online purchase (txn_id 3476682).",
+        "source": "customer",
+        "ref": "Customer C07297 message: 'I never made this $482.12 purchase. Please check my card.'",
+        "entity_ids": [
+          "C07297",
+          "3476682"
+        ]
+      },
+      {
+        "claim": "Policy R2 mandates blocking the card and creating a case when the customer denies the transaction.",
+        "source": "document",
+        "ref": "policy_rules",
+        "entity_ids": [
+          "C07297-K1"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Customer C07297 reported an unauthorized $482.12 card-not-present purchase on card C07297-K1. The investigation confirmed card_not_present_fraud with absolute probability (1.00). In accordance with Policy R2, the card has been blocked and the case formally documented.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-006-1790192018"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Policy R2: Customer denies transaction -> BLOCK_CARD + CREATE_CASE."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Policy R2 / Policy Documents: Open case when customer disputes transaction."
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Policy R2: Customer denies transaction -> BLOCK_CARD + CREATE_CASE."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Policy R2 / Policy Documents: Open case when customer disputes transaction."
+      },
+      {
+        "action": "GENERATE_REPORT",
+        "route": "auto",
+        "reason": "Policy R2 / Section 4: Generate internal fraud report for confirmed customer dispute and loss documentation."
+      }
+    ],
+    "what_changed": "Added GENERATE_REPORT to document the confirmed card-not-present fraud case and financial exposure for operational tracking."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Exposure of $482.12 is below the $1,000 threshold, and there is no evidence of a fraud ring, shared device/region, or coordinated undocumented pattern per SAR filing rules.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Investigation concludes per Policy Section 6 after confirming the unauthorized card-not-present transaction, blocking the compromised card, creating the formal case, and generating the necessary internal reports.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 5.88
+}

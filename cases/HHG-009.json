@@ -1,0 +1,72 @@
+{
+  "case_id": "HHG-009",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 1.0,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3581141"
+    ],
+    "first_suspicious_txn_id": "3581141",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 30.02,
+    "evidence": [
+      {
+        "claim": "Customer directly contacted support denying transaction 3581141 ($30.02), which constitutes customer denial/confirmed fraud evidence under Policy R2.",
+        "source": "customer",
+        "ref": "applicable_policies",
+        "entity_ids": [
+          "3581141",
+          "C08299"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Customer C08299 reported an unauthorized $30.02 purchase (Txn 3581141) on card C08299-K1. The investigation confirmed card_not_present_fraud with a probability of 1.00. The card has been blocked and the case logged as confirmed fraud, requiring no further escalation.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-009-1790192042"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Customer denies transaction -> BLOCK_CARD + CREATE_CASE per Policy R2."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Customer denies transaction -> BLOCK_CARD + CREATE_CASE per Policy R2."
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Customer confirmed unauthorized transaction -> BLOCK_CARD per Policy R2."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Customer reported fraudulent transaction -> CREATE_CASE per Policy R2."
+      }
+    ],
+    "what_changed": "No changes; initial recommendations confirmed."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Exposure of $30.02 does not exceed the $1,000 threshold, and no broader fraud ring, coordinated pattern, or shared device/region/card anomalies were detected.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Investigation complete with card blocked and case created; exposure is below SAR filing threshold and no secondary risk factors or connected cards were identified per Policy Section 6.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 5.16
+}

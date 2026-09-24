@@ -1,0 +1,25 @@
+# Byte-compiled / cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environments & Secrets (NEVER commit actual API keys)
+.env
+.venv/
+venv/
+ENV/
+
+# Large raw dataset files (IEEE-CIS dataset)
+HHGOA_IEEE/
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Distribution & Packaging
+*.egg-info/
+dist/
+build/

@@ -1,0 +1,103 @@
+{
+  "case_id": "HHG-010",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.9,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3506725"
+    ],
+    "first_suspicious_txn_id": "3506725",
+    "connected_card_ids": [],
+    "connected_device_profiles": [
+      "DBD75C3985A"
+    ],
+    "exposure_usd": 1000.03,
+    "evidence": [
+      {
+        "claim": "Transaction 3506725 is an online transaction for $1,000.03 with a high risk score of 0.90 using anonymous email domains.",
+        "source": "graph",
+        "ref": "query:flagged_transaction",
+        "entity_ids": [
+          "3506725",
+          "C10434-K1"
+        ]
+      },
+      {
+        "claim": "Fraud probability >= 0.85 supported by model score and anomaly characteristics warrants case creation and transaction intervention.",
+        "source": "document",
+        "ref": "policy_rules",
+        "entity_ids": [
+          "policy_rules"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Case HHG-010 involves a confirmed card-not-present online fraud attempt of $1,000.03 on card C10434-K1 belonging to customer C10434. The transaction was declined, the card blocked, and a formal SAR filed due to exposure exceeding $1,000. The case is now closed as confirmed fraud.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-010-1790192051"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "DECLINE_TRANSACTION",
+        "route": "L1",
+        "reason": "High risk online transaction (risk score 0.90, amount $1,000.03) matching card-not-present fraud pattern."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Fraud probability >= 0.30 requires opening a case under policy_cases_vs_sars."
+      },
+      {
+        "action": "STEP_UP_AUTH",
+        "route": "auto",
+        "reason": "Verify card-not-present suspicious high-value online transaction."
+      }
+    ],
+    "final": [
+      {
+        "action": "DECLINE_TRANSACTION",
+        "route": "L1",
+        "reason": "Policy R1, R2: High risk online transaction ($1,000.03, risk score 0.90) identified as card-not-present fraud requires manual L1 review and decline."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Policy R3, R4: Fraud probability >= 0.30 mandates opening an automated formal fraud case."
+      },
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Policy R2, R5: Confirmed card-not-present fraud with exposure <= $2,500 requires card blocking via L1 authorization."
+      },
+      {
+        "action": "FILE_REPORT",
+        "route": "L2",
+        "reason": "Policy R8, R10: Fraud is confirmed with exposure over $1,000 ($1,000.03), meeting mandatory SAR filing criteria."
+      }
+    ],
+    "what_changed": "Added BLOCK_CARD to prevent further unauthorized online attempts on compromised card C10434-K1 and added FILE_REPORT due to exposure exceeding the $1,000 threshold."
+  },
+  "sar": {
+    "file": true,
+    "reason": "Fraud is confirmed with total financial exposure exceeding the $1,000 threshold ($1,000.03), mandating a Suspicious Activity Report under policy rules.",
+    "narrative": "On the review date, real-time risk models flagged transaction 3506725 in the amount of $1,000.03 as highly suspicious with a risk score of 0.90. The transaction was initiated as an unauthorized online card-not-present purchase outside the customer's normal historical behavior. Investigation by the fraud operations team confirmed the activity as fraudulent card-not-present exploitation. Consequently, the transaction was declined, the card was blocked to prevent further loss, and a formal case was generated. Because the total financial exposure of $1,000.03 exceeds the mandatory reporting threshold of $1,000, a Suspicious Activity Report (SAR) is required. All supporting evidence and transaction identifiers have been documented for regulatory compliance.",
+    "subjects": [
+      "C10434",
+      "C10434-K1"
+    ],
+    "total_amount_usd": 1000.03,
+    "activity_dates": [
+      "2023-10-01",
+      "2023-10-01"
+    ]
+  },
+  "stop_reason": "Investigation completed with transaction declined, card blocked, and mandatory SAR filed for confirmed fraud exceeding the exposure threshold per Policy Section 6.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 7.06
+}

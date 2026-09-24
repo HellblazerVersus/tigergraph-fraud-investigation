@@ -1,0 +1,72 @@
+{
+  "case_id": "HHG-003",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 1.0,
+    "pattern": "out_of_region_use",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3530164"
+    ],
+    "first_suspicious_txn_id": "3530164",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 49.0,
+    "evidence": [
+      {
+        "claim": "Customer explicitly denies making the $49.00 purchase (transaction 3530164).",
+        "source": "customer",
+        "ref": "query: Customer C08623 message: 'I never made this $49.00 purchase. Please check my card.' Refers to 3530164.",
+        "entity_ids": [
+          "3530164",
+          "C08623"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Customer C08623 reported an unauthorized $49.00 transaction (3530164) on card C08623-K2 involving out_of_region_use. In accordance with Policy R2, the card was blocked and the case was documented. As the exposure is below $1,000 and no broader fraud ring was detected, no SAR is required.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-003-1790191993"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Policy R2: Customer denies -> BLOCK_CARD + CREATE_CASE."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Policy R2: Customer denies -> BLOCK_CARD + CREATE_CASE."
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Policy R2: Customer confirmed unauthorized use -> BLOCK_CARD executed."
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "Policy R2: Case creation required for tracked investigation and record-keeping."
+      }
+    ],
+    "what_changed": "No changes; initial recommendations confirmed."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Exposure is $49.00, which is well below the $1,000 threshold, and no fraud ring or coordinated undocumented pattern was identified.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Policy Section 6: Investigation complete with card blocked and case created for customer dispute under $1,000 without SAR filing triggers.",
+  "tool_calls": 7,
+  "tokens": 0,
+  "latency_s": 4.71
+}
