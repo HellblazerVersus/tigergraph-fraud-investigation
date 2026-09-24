@@ -1,6 +1,13 @@
-# HHGOA Fraud Investigation Agent
+# TigerGraph Agentic Fraud Investigation System
 
-An autonomous, agentic fraud investigation system built on **TigerGraph** for the **Hacker House Goa 2026** hackathon.
+[![Live Demo](https://img.shields.io/badge/Streamlit_App-Live_Demo-FA6400?style=for-the-badge&logo=streamlit)](https://fraud-investigationvajra.streamlit.app/)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/HellblazerVersus/tigergraph-fraud-investigation)
+[![TigerGraph 4.2.5](https://img.shields.io/badge/TigerGraph-4.2.5_CE-2563EB?style=for-the-badge)](https://www.tigergraph.com/)
+[![Gemini](https://img.shields.io/badge/Google_Gemini-2.5_Flash-10B981?style=for-the-badge&logo=google)](https://ai.google.dev/)
+
+An autonomous, agentic fraud investigation system built with **TigerGraph Community Edition 4.2.5**, **LangGraph**, and **Google Gemini** for the **Hacker House Goa 2026** hackathon (Team Vajra).
+
+🌐 **Live Cloud Application:** [https://fraud-investigationvajra.streamlit.app/](https://fraud-investigationvajra.streamlit.app/)
 
 ---
 
@@ -37,7 +44,7 @@ Trigger Event ──► TigerGraph Retrieval ──► Synthesis (Gemini) ──
 | **Graph Database** | TigerGraph Community Edition 4.2.5 |
 | **Graph Query Layer** | pyTigerGraph + REST API endpoints |
 | **Agent Framework** | LangGraph + LangChain |
-| **Reasoning Model** | Google Gemini (`gemini-3.5-flash-lite` with fallback to `gemini-3.1-flash-lite`, `gemini-3.8-flash`) |
+| **Reasoning Model** | Google Gemini (`gemini-2.5-flash-lite`, `gemini-1.5-flash`) |
 | **Protocol** | Model Context Protocol (MCP 2.2.0) |
 | **Analyst UI** | Streamlit 1.64 |
 
@@ -48,13 +55,16 @@ Trigger Event ──► TigerGraph Retrieval ──► Synthesis (Gemini) ──
 ### 1. Environment Setup
 
 ```bash
-# Clone and setup environment
-cd /mnt/d/Projects/hh2
-uv sync  # or pip install -r requirements.txt
+# Clone the repository
+git clone https://github.com/HellblazerVersus/tigergraph-fraud-investigation.git
+cd tigergraph-fraud-investigation
 
-# Configure .env
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment
 cp .env.example .env
-# Ensure GEMINI_API_KEY and TigerGraph credentials are configured
+# Set your GEMINI_API_KEY and TigerGraph credentials in .env
 ```
 
 ### 2. Ingest Data into TigerGraph
@@ -90,7 +100,7 @@ uv run python3 tigergraph_mcp/server.py
 ## 📁 Repository Structure
 
 ```
-hh2/
+tigergraph-fraud-investigation/
 ├── HHGOA_IEEE/                  # Dataset & Fraud Policy documentation
 ├── schema/                      # TigerGraph DDL (10 vertex types, 18 edge types)
 ├── data/                        # High-throughput streaming ETL pipeline
