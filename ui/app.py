@@ -14,28 +14,19 @@ import json
 import time
 import pandas as pd
 import streamlit as st
-import streamlit.components.v1 as components
 from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from agent.tools import (
-    _get_conn,
-    graph_card_window,
-    graph_txn_subgraph,
-    graph_customer_history,
-    graph_card_testing_check,
-    graph_region_history,
-    graph_device_neighbors,
-)
+from agent.tools import _get_conn
 
 # ─────────────────────────────────────────────────────────
 # Page Configuration
 # ─────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="TigerGraph GraphStudio | Fraud Investigation",
+    page_title="TigerGraph Fraud Investigation | Autonomous AI Agent",
     page_icon="🐅",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -44,7 +35,6 @@ st.set_page_config(
 DATASET_DIR = os.getenv("DATASET_DIR", "./HHGOA_IEEE")
 CASES_DIR = Path(os.getenv("CASES_OUTPUT_DIR", "./cases"))
 CASES_DIR.mkdir(exist_ok=True)
-STUDIO_URL = "http://localhost:14240/studio/#/schema-designer?graph=fraud_investigation"
 
 # ─────────────────────────────────────────────────────────
 # TigerGraph GraphStudio Authentic Styling (Matching image.png)
@@ -292,52 +282,39 @@ ROUTE_COLORS = {
 }
 
 # ─────────────────────────────────────────────────────────
-# Top GraphStudio Header Banner (Matching image.png)
+# Top Header Banner
 # ─────────────────────────────────────────────────────────
 st.html("""
-<div style="display:flex; align-items:center; justify-content:space-between; background:#FFFFFF; padding:12px 24px; border-radius:6px; border:1px solid #E5E7EB; margin-bottom:18px; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
+<div style="display:flex; align-items:center; justify-content:space-between; background:#FFFFFF; padding:14px 24px; border-radius:6px; border:1px solid #E5E7EB; margin-bottom:18px; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
   <div style="display:flex; align-items:center; gap:12px;">
     <span style="font-size:26px;">🐅</span>
     <div>
-      <span style="font-size:22px; font-weight:800; color:#FA6400; letter-spacing:-0.5px;">Graph</span><span style="font-size:22px; font-weight:800; color:#1F2937; letter-spacing:-0.5px;">Studio</span>
-      <span style="font-size:11px; background:#F3F4F6; color:#6B7280; padding:3px 8px; border-radius:12px; margin-left:8px; border:1px solid #E5E7EB; font-weight:600;">Version: 4.2.5</span>
+      <span style="font-size:20px; font-weight:800; color:#FA6400; letter-spacing:-0.5px;">TigerGraph</span>
+      <span style="font-size:20px; font-weight:800; color:#1F2937; letter-spacing:-0.5px;"> Fraud Investigation System</span>
+      <span style="font-size:11px; background:#F3F4F6; color:#6B7280; padding:3px 8px; border-radius:12px; margin-left:8px; border:1px solid #E5E7EB; font-weight:600;">Hacker House Goa</span>
     </div>
   </div>
-  <div style="display:flex; align-items:center; gap:16px;">
-    <div style="display:flex; align-items:center; gap:10px; background:#F8FAFC; border:1px solid #CBD5E1; padding:6px 16px; border-radius:24px;">
-      <div style="width:24px; height:24px; border-radius:50%; background:#10B981; color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">F</div>
-      <div style="text-align:left; line-height:1.2;">
-        <div style="font-size:13px; font-weight:700; color:#0F172A;">fraud_investigation</div>
-        <div style="font-size:10px; color:#64748B;">superuser</div>
-      </div>
+  <div style="display:flex; align-items:center; gap:10px; background:#F8FAFC; border:1px solid #CBD5E1; padding:6px 16px; border-radius:24px;">
+    <div style="width:24px; height:24px; border-radius:50%; background:#10B981; color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">TG</div>
+    <div style="text-align:left; line-height:1.2;">
+      <div style="font-size:12px; font-weight:700; color:#0F172A;">fraud_investigation</div>
+      <div style="font-size:10px; color:#64748B;">LangGraph + Gemini 2.5 Flash Lite</div>
     </div>
-    <a href="http://localhost:14240/studio/#/schema-designer?graph=fraud_investigation" target="_blank" style="text-decoration:none; background:#FA6400; color:#FFFFFF; padding:7px 14px; border-radius:4px; font-size:12px; font-weight:600;">🌐 Open Studio</a>
   </div>
 </div>
 """)
 
 # ─────────────────────────────────────────────────────────
-# Sidebar Navigation (Mirrored from GraphStudio in image.png)
+# Sidebar Navigation
 # ─────────────────────────────────────────────────────────
 with st.sidebar:
-    st.html("""
-    <div style="display:flex; align-items:center; gap:10px; background:#F8FAFC; border:1px solid #E2E8F0; padding:10px 12px; border-radius:8px; margin-bottom:12px;">
-      <div style="width:28px; height:28px; border-radius:50%; background:#10B981; color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">F</div>
-      <div style="line-height:1.2;">
-        <div style="font-size:13px; font-weight:700; color:#0F172A;">fraud_investigation</div>
-        <div style="font-size:11px; color:#64748B;">superuser</div>
-      </div>
-    </div>
-    """)
+    st.markdown("### 🐅 Navigation")
 
     page = st.radio(
-        "GraphStudio Modules",
+        "Investigation Modules",
         [
             "📊 Executive Dashboard",
-            "🕸️ Design Schema (GraphStudio)",
-            "🧭 Explore Graph",
-            "✍️ Write Queries (GSQL Runner)",
-            "🖥️ Embedded GraphStudio Live",
+            "🕸️ Design Schema",
             "🕵️ Investigate Case (AI Agent)",
             "📁 Benchmark Cases (20 Cases)",
             "🧠 Graph Case Memory",
@@ -430,23 +407,13 @@ if page == "📊 Executive Dashboard":
 # ─────────────────────────────────────────────────────────
 # PAGE 2: Design Schema (GraphStudio — Mirroring image.png)
 # ─────────────────────────────────────────────────────────
-elif page == "🕸️ Design Schema (GraphStudio)":
-    st.subheader("🕸️ GraphStudio Schema Designer")
+elif page == "🕸️ Design Schema":
+    st.subheader("🕸️ TigerGraph Schema Architecture")
     st.caption("Visual representation of the 10 vertex types and 18 edge types in graph `fraud_investigation`")
-
-    # Toolbar matching GraphStudio in image.png
-    with st.container(border=True):
-        tb1, tb2, tb3, tb4, tb5, tb6 = st.columns(6)
-        tb1.button("➕ Add Vertex Type", disabled=True)
-        tb2.button("➕ Add Edge Type", disabled=True)
-        tb3.button("💾 Save Schema", disabled=True)
-        tb4.button("📤 Export Schema", disabled=True)
-        tb5.button("🔄 Sync TigerGraph", on_click=st.cache_data.clear)
-        tb6.markdown(f"[🌐 Launch Studio]({STUDIO_URL})")
 
     # Schema Graph Diagram using Graphviz
     with st.container(border=True):
-        st.markdown("#### Schema Architecture Canvas")
+        st.markdown("#### Graph Schema Canvas")
         dot_code = """
         digraph FraudInvestigationSchema {
             graph [rankdir=LR, bgcolor="transparent", fontname="Inter"];
@@ -520,213 +487,7 @@ elif page == "🕸️ Design Schema (GraphStudio)":
 
 
 # ─────────────────────────────────────────────────────────
-# PAGE 3: Explore Graph
-# ─────────────────────────────────────────────────────────
-elif page == "🧭 Explore Graph":
-    st.subheader("🧭 TigerGraph Neighborhood Explorer")
-    st.caption("Inspect live connected subgraphs, transaction temporal chains, and shared device networks.")
-
-    e_col1, e_col2, e_col3 = st.columns([1.5, 2.5, 1])
-    with e_col1:
-        entity_type = st.selectbox("Entity Type", ["Transaction", "Card", "Customer", "Device"])
-    with e_col2:
-        default_val = {
-            "Transaction": "3514030",
-            "Card": "C12382-K1",
-            "Customer": "C12382",
-            "Device": "DBD75C3985A"
-        }.get(entity_type, "3514030")
-        entity_id = st.text_input("Enter ID", value=default_val)
-    with e_col3:
-        st.markdown("<br>", unsafe_allow_html=True)
-        explore_btn = st.button("Explore Subgraph", type="primary")
-
-    if explore_btn or entity_id:
-        with st.spinner(f"Traversing graph for {entity_type} {entity_id}..."):
-            if entity_type == "Transaction":
-                try:
-                    subgraph = graph_txn_subgraph.invoke({"txn_id": entity_id})
-                except Exception:
-                    subgraph = {
-                        "txn_id": entity_id,
-                        "amount": 280.00,
-                        "card_id": "C12382-K1",
-                        "customer_id": "C12382",
-                        "device_ids": ["dev_android_981a", "dev_chrome_104b"],
-                        "email_domain": "gmail.com",
-                    }
-                card_id = subgraph.get("card_id", "N/A")
-                cust_id = subgraph.get("customer_id", "N/A")
-                dev_ids = subgraph.get("device_ids", [])
-                email = subgraph.get("email_domain", "N/A")
-
-                with st.container(border=True):
-                    st.markdown(f"#### 1-Hop Subgraph for Transaction `{entity_id}`")
-                    sub_dot = f"""
-                    digraph Subgraph {{
-                        graph [rankdir=LR, bgcolor="transparent", fontname="Inter"];
-                        node [shape=box, style=filled, fontname="Inter", fontsize=10, fontcolor="#FFFFFF", rx=6, ry=6];
-                        edge [fontname="JetBrains Mono", fontsize=8, color="#94A3B8", fontcolor="#60A5FA"];
-
-                        Txn [fillcolor="#8B5CF6", label="Transaction\\n{entity_id}\\nAmount: ${subgraph.get('amount', 0):,.2f}"];
-                        CardNode [fillcolor="#3B82F6", label="Card\\n{card_id}"];
-                        CustNode [fillcolor="#F59E0B", label="Customer\\n{cust_id}"];
-                        EmailNode [fillcolor="#14B8A6", label="Email\\n{email}"];
-
-                        CardNode -> Txn [label="MADE"];
-                        CustNode -> CardNode [label="OWNS"];
-                        Txn -> EmailNode [label="PURCHASER_EMAIL"];
-                    """
-                    for d in dev_ids:
-                        sub_dot += f"""
-                        Dev_{d[:8]} [fillcolor="#10B981", label="Device\\n{d[:12]}"];
-                        Txn -> Dev_{d[:8]} [label="FROM_DEVICE"];
-                        """
-                    sub_dot += "}"
-                    st.graphviz_chart(sub_dot, width="stretch")
-                    st.json(subgraph)
-
-            elif entity_type == "Card":
-                try:
-                    win = graph_card_window.invoke({"card_id": entity_id, "hours": 48})
-                    ct = graph_card_testing_check.invoke({"card_id": entity_id})
-                except Exception:
-                    win = {"query": "card_window", "card_id": entity_id, "hours": 48, "txn_count": 8}
-                    ct = {"is_card_testing_pattern": True, "small_txns": 4, "subsequent_large_txn": True}
-                with st.container(border=True):
-                    st.markdown(f"#### 48-Hour Activity on Card `{entity_id}`")
-                    st.markdown(f"**Total Transactions in Window:** `{win.get('txn_count', 0)}` &nbsp;|&nbsp; **Card Testing Detected:** `{ct.get('is_card_testing_pattern', False)}`")
-                    st.json(win)
-
-            elif entity_type == "Customer":
-                try:
-                    hist = graph_customer_history.invoke({"customer_id": entity_id})
-                except Exception:
-                    hist = {"customer_id": entity_id, "card_ids": ["C12382-K1", "C12382-K2"], "total_txns": 42}
-                with st.container(border=True):
-                    st.markdown(f"#### Customer Profile for `{entity_id}`")
-                    st.markdown(f"**Customer Owned Cards ({len(hist.get('card_ids', []))}):** {', '.join([f'`{c}`' for c in hist.get('card_ids', [])])}")
-                    st.json(hist)
-
-            elif entity_type == "Device":
-                try:
-                    dev_res = graph_device_neighbors.invoke({"txn_id": "3506725", "days": 90})
-                except Exception:
-                    dev_res = {"txn_id": "3506725", "shared_devices": 2, "connected_cards": ["C12382-K1", "C10042-K1"]}
-                with st.container(border=True):
-                    st.markdown(f"#### Device Neighbors for `{entity_id}`")
-                    st.json(dev_res)
-
-
-# ─────────────────────────────────────────────────────────
-# PAGE 4: Write Queries (GSQL Runner)
-# ─────────────────────────────────────────────────────────
-elif page == "✍️ Write Queries (GSQL Runner)":
-    st.subheader("✍️ TigerGraph GSQL Query Runner")
-    st.caption("Execute pre-installed and analytical graph queries against `fraud_investigation`")
-
-    query_choice = st.selectbox(
-        "Select Stored Query",
-        [
-            "card_window(card_id, hours)",
-            "txn_subgraph(txn_id)",
-            "customer_history(customer_id)",
-            "card_testing_check(card_id, amount_threshold, count_threshold)",
-            "region_history(card_id)",
-            "device_neighbors(txn_id, days)",
-        ]
-    )
-
-    q_form = st.container(border=True)
-    with q_form:
-        if "card_window" in query_choice:
-            p_card = st.text_input("card_id", "C12382-K1")
-            p_hours = st.number_input("hours", value=48, min_value=1, max_value=720)
-            if st.button("▶️ Execute Query", type="primary"):
-                try:
-                    res = graph_card_window.invoke({"card_id": p_card, "hours": int(p_hours)})
-                    st.success("Query Executed Successfully via TigerGraph REST++")
-                    st.json(res)
-                except Exception as e:
-                    st.info("TigerGraph local daemon offline on public container. Sample GSQL execution output:")
-                    st.json({"query": "card_window", "card_id": p_card, "hours": int(p_hours), "txn_count": 8, "status": "COMPLETED"})
-
-        elif "txn_subgraph" in query_choice:
-            p_txn = st.text_input("txn_id", "3514030")
-            if st.button("▶️ Execute Query", type="primary"):
-                try:
-                    res = graph_txn_subgraph.invoke({"txn_id": p_txn})
-                    st.success("Query Executed Successfully via TigerGraph REST++")
-                    st.json(res)
-                except Exception as e:
-                    st.info("TigerGraph local daemon offline on public container. Sample GSQL execution output:")
-                    st.json({"query": "txn_subgraph", "txn_id": p_txn, "card_id": "C12382-K1", "customer_id": "C12382", "device_ids": ["DBD75C3985A"], "email_domain": "gmail.com"})
-
-        elif "customer_history" in query_choice:
-            p_cust = st.text_input("customer_id", "C12382")
-            if st.button("▶️ Execute Query", type="primary"):
-                try:
-                    res = graph_customer_history.invoke({"customer_id": p_cust})
-                    st.success("Query Executed Successfully via TigerGraph REST++")
-                    st.json(res)
-                except Exception as e:
-                    st.info("TigerGraph local daemon offline on public container. Sample GSQL execution output:")
-                    st.json({"query": "customer_history", "customer_id": p_cust, "card_ids": ["C12382-K1", "C12382-K2"], "total_txns": 42})
-
-        elif "card_testing_check" in query_choice:
-            p_card = st.text_input("card_id", "C11891-K1")
-            p_amt = st.number_input("amount_threshold", value=5.0)
-            p_cnt = int(st.number_input("count_threshold", value=3))
-            if st.button("▶️ Execute Query", type="primary"):
-                try:
-                    res = graph_card_testing_check.invoke({
-                        "card_id": p_card,
-                        "amount_threshold": float(p_amt),
-                        "count_threshold": int(p_cnt),
-                    })
-                    st.success("Query Executed Successfully via TigerGraph REST++")
-                    st.json(res)
-                except Exception as e:
-                    st.info("TigerGraph local daemon offline on public container. Sample GSQL execution output:")
-                    st.json({"query": "card_testing_check", "card_id": p_card, "is_card_testing_pattern": True, "small_txns": 4, "subsequent_large_txn": True})
-
-        elif "region_history" in query_choice:
-            p_card = st.text_input("card_id", "C12382-K1")
-            if st.button("▶️ Execute Query", type="primary"):
-                try:
-                    res = graph_region_history.invoke({"card_id": p_card})
-                    st.success("Query Executed Successfully via TigerGraph REST++")
-                    st.json(res)
-                except Exception as e:
-                    st.info("TigerGraph local daemon offline on public container. Sample GSQL execution output:")
-                    st.json({"query": "region_history", "card_id": p_card, "primary_region": "R128", "out_of_region_count": 2})
-
-        elif "device_neighbors" in query_choice:
-            p_txn = st.text_input("txn_id", "3506725")
-            p_days = int(st.number_input("days", value=90))
-            if st.button("▶️ Execute Query", type="primary"):
-                try:
-                    res = graph_device_neighbors.invoke({"txn_id": p_txn, "days": int(p_days)})
-                    st.success("Query Executed Successfully via TigerGraph REST++")
-                    st.json(res)
-                except Exception as e:
-                    st.info("TigerGraph local daemon offline on public container. Sample GSQL execution output:")
-                    st.json({"query": "device_neighbors", "txn_id": p_txn, "shared_devices": 2, "connected_cards": ["C12382-K1", "C10042-K1"]})
-
-
-# ─────────────────────────────────────────────────────────
-# PAGE 5: Embedded GraphStudio Live
-# ─────────────────────────────────────────────────────────
-elif page == "🖥️ Embedded GraphStudio Live":
-    st.subheader("🖥️ Live Embedded TigerGraph GraphStudio")
-    st.caption(f"Connecting to live GraphStudio web server on `{STUDIO_URL}`")
-
-    st.info("💡 You can interact with GraphStudio directly inside this window, or open it in a full tab.")
-    components.iframe(STUDIO_URL, height=850, scrolling=True)
-
-
-# ─────────────────────────────────────────────────────────
-# PAGE 6: Investigate Case (AI Agent)
+# PAGE 3: Investigate Case (AI Agent)
 # ─────────────────────────────────────────────────────────
 elif page == "🕵️ Investigate Case (AI Agent)":
     st.subheader("🕵️ Autonomous Fraud Investigation Agent")
