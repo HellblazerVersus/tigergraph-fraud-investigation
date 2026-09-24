@@ -106,10 +106,7 @@ hh2/
 │   └── app.py
 ├── benchmark/                   # Benchmark batch runner
 │   └── run_benchmark_cases.py
-├── cases/                       # Generated answer files (HHG-001.json ... HHG-020.json)
-└── blog/                        # Submission Deliverables
-    ├── technical_blog_post.md   # Complete technical deep dive
-    └── social_post.md           # Draft social media announcement (@TigerGraphDB)
+└── cases/                       # Generated answer files (HHG-001.json ... HHG-020.json)
 ```
 
 ---
